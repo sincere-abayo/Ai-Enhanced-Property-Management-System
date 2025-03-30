@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payments - Property Management System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1a56db',
+                        secondary: '#7e3af2',
+                        success: '#0ea5e9',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50">
+    <!-- Sidebar -->
+    <?php include 'admin_sidebar.php'; ?>  
+    
+    <!-- Main Content -->
+    <div class="ml-64 p-8">
+        <!-- Header -->
+        <div class="flex justify-between items-center mb-8">
+            <div>
+                <h2 class="text-2xl font-bold text-gray-800">Payments</h2>
+                <p class="text-gray-600">Track and manage rent payments</p>
+            </div>
+            <button onclick="openRecordPaymentModal()" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                <i class="fas fa-plus mr-2"></i>Record Payment
+            </button>
+        </div>
+
+        <!-- Payment Summary Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white rounded-xl shadow-md p-6">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-green-100">
+                        <i class="fas fa-check-circle text-green-500 text-2xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <h3 class="text-gray-500 text-sm">Paid This Month</h3>
+                        <p class="text-2xl font-semibold">$8,500</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-md p-6">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-yellow-100">
+                        <i class="fas fa-clock text-yellow-500 text-2xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <h3 class="text-gray-500 text-sm">Pending</h3>
+                        <p class="text-2xl font-semibold">$2,500</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-md p-6">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-red-100">
+                        <i class="fas fa-exclamation-circle text-red-500 text-2xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <h3 class="text-gray-500 text-sm">Overdue</h3>
+                        <p class="text-2xl font-semibold">$1,200</p>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white rounded-xl shadow-md p-6">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-blue-100">
+                        <i class="fas fa-chart-line text-blue-500 text-2xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <h3 class="text-gray-500 text-sm">Total Expected</h3>
+                        <p class="text-2xl font-semibold">$12,200</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payment Filters -->
+        <div class="bg-white rounded-xl shadow-md p-6 mb-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                    <select class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring-primary">
+                        <option>All</option>
+                        <option>Paid</option>
+                        <option>Pending</option>
+                        <option>Overdue</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Property</label>
+                    <select class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring-primary">
+                        <option>All Properties</option>
+                        <option>Modern Apartment</option>
+                        <option>Luxury House</option>
+                        <option>Studio Apartment</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Date Range</label>
+                    <input type="month" class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring-primary">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Search</label>
+                    <input type="text" placeholder="Search payments..." class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring-primary">
+                </div>
+            </div>
+        </div>
+
+        <!-- Payments Table -->
+        <div class="bg-white rounded-xl shadow-md overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tenant</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Property</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Due Date</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0 h-10 w-10">
+                                        <img class="h-10 w-10 rounded-full" src="https://ui-avatars.com/api/?name=John+Doe" alt="Tenant">
+                                    </div>
+                                    <div class="ml-4">
+                                        <div class="text-sm font-medium text-gray-900">John Doe</div>
+                                        <div class="text-sm text-gray-500">john.doe@example.com</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">Modern Apartment</div>
+                                <div class="text-sm text-gray-500">Room 101</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">$1,500</div>
+                                <div class="text-sm text-gray-500">Monthly Rent</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">Mar 1, 2024</div>
+                                <div class="text-sm text-gray-500">Due in 5 days</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                    Pending
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <button class="text-primary hover:text-blue-700 mr-3">Record</button>
+                                <button class="text-primary hover:text-blue-700 mr-3">Remind</button>
+                                <button class="text-red-600 hover:text-red-900">Report</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0 h-10 w-10">
+                                        <img class="h-10 w-10 rounded-full" src="https://ui-avatars.com/api/?name=Jane+Smith" alt="Tenant">
+                                    </div>
+                                    <div class="ml-4">
+                                        <div class="text-sm font-medium text-gray-900">Jane Smith</div>
+                                        <div class="text-sm text-gray-500">jane.smith@example.com</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">Studio Apartment</div>
+                                <div class="text-sm text-gray-500">Room 202</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">$1,200</div>
+                                <div class="text-sm text-gray-500">Monthly Rent</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">Feb 1, 2024</div>
+                                <div class="text-sm text-gray-500">Overdue</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                                    Overdue
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <button class="text-primary hover:text-blue-700 mr-3">Record</button>
+                                <button class="text-primary hover:text-blue-700 mr-3">Remind</button>
+                                <button class="text-red-600 hover:text-red-900">Report</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Record Payment Modal -->
+    <div id="recordPaymentModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center">
+        <div class="bg-white rounded-xl p-8 max-w-2xl w-full mx-4">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold">Record Payment</h3>
+                <button onclick="closeRecordPaymentModal()" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Tenant</label>
+                        <select class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring-primary">
+                            <option>Select Tenant</option>
+                            <option>John Doe</option>
+                            <option>Jane Smith</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Property</label>
+                        <select class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring-primary">
+                            <option>Select Property</option>
+                            <option>Modern Apartment</option>
+                            <option>Luxury House</option>
+                            <option>Studio Apartment</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Amount</label>
+                        <input type="number" class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring-primary">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Payment Date</label>
+                        <input type="date" class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring-primary">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Payment Method</label>
+                        <select class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring-primary">
+                            <option>Cash</option>
+                            <option>Bank Transfer</option>
+                            <option>Mobile Money</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Payment Period</label>
+                        <input type="month" class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring-primary">
+                    </div>
+                </div>
+                <div class="flex justify-end space-x-4 mt-6">
+                    <button type="button" onclick="closeRecordPaymentModal()" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+                        Cancel
+                    </button>
+                    <button type="submit" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-700">
+                        Record Payment
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openRecordPaymentModal() {
+            document.getElementById('recordPaymentModal').classList.remove('hidden');
+            document.getElementById('recordPaymentModal').classList.add('flex');
+        }
+
+        function closeRecordPaymentModal() {
+            document.getElementById('recordPaymentModal').classList.add('hidden');
+            document.getElementById('recordPaymentModal').classList.remove('flex');
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('recordPaymentModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeRecordPaymentModal();
+            }
+        });
+    </script>
+</body>
+</html> 

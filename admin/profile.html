@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - Admin Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1a56db',
+                        secondary: '#7e3af2',
+                        success: '#0ea5e9',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50">
+    <!-- Sidebar -->
+    <?php include 'admin_sidebar.php'; ?>  
+
+    <!-- Main Content -->
+    <div class="ml-64 p-8">
+        <!-- Header -->
+        <div class="flex justify-between items-center mb-8">
+            <div>
+                <h2 class="text-2xl font-bold text-gray-800">Profile</h2>
+                <p class="text-gray-600">Manage your account and business information</p>
+            </div>
+            <button onclick="openEditModal()" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                <i class="fas fa-edit mr-2"></i>Edit Profile
+            </button>
+        </div>
+
+        <!-- Profile Information -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Personal Information -->
+            <div class="md:col-span-2">
+                <div class="bg-white rounded-xl shadow-md p-6">
+                    <h3 class="text-lg font-semibold mb-4">Personal Information</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center">
+                                <i class="fas fa-user text-4xl text-gray-400"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-medium">John Smith</h4>
+                                <p class="text-gray-500">Property Manager</p>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-500">Email</label>
+                                <p class="mt-1">john.smith@example.com</p>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-500">Phone</label>
+                                <p class="mt-1">+1 (555) 123-4567</p>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-500">Business Name</label>
+                                <p class="mt-1">Smith Property Management</p>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-500">Business Phone</label>
+                                <p class="mt-1">+1 (555) 987-6543</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Business Statistics -->
+            <div>
+                <div class="bg-white rounded-xl shadow-md p-6">
+                    <h3 class="text-lg font-semibold mb-4">Business Statistics</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-500">Total Properties</label>
+                            <p class="mt-1 text-2xl font-semibold">12</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-500">Active Tenants</label>
+                            <p class="mt-1 text-2xl font-semibold">28</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-500">Monthly Revenue</label>
+                            <p class="mt-1 text-2xl font-semibold">$45,500</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-500">Occupancy Rate</label>
+                            <p class="mt-1 text-2xl font-semibold">92%</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Business Information -->
+            <div class="md:col-span-2">
+                <div class="bg-white rounded-xl shadow-md p-6">
+                    <h3 class="text-lg font-semibold mb-4">Business Information</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-500">Business Address</label>
+                            <p class="mt-1">456 Business Street, Suite 100</p>
+                            <p class="text-sm text-gray-500">New York, NY 10001</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-500">Tax ID</label>
+                            <p class="mt-1">12-3456789</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-500">Business Registration</label>
+                            <p class="mt-1">Registered in New York</p>
+                            <p class="text-sm text-gray-500">Registration #: NY123456</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-500">Insurance Information</label>
+                            <p class="mt-1">Property Insurance: Active</p>
+                            <p class="text-sm text-gray-500">Policy #: INS123456</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Preferences -->
+            <div>
+                <div class="bg-white rounded-xl shadow-md p-6">
+                    <h3 class="text-lg font-semibold mb-4">Preferences</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-500">Notification Settings</label>
+                            <div class="mt-2 space-y-2">
+                                <label class="flex items-center">
+                                    <input type="checkbox" class="rounded text-primary focus:ring-primary" checked>
+                                    <span class="ml-2">Payment notifications</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" class="rounded text-primary focus:ring-primary" checked>
+                                    <span class="ml-2">Maintenance alerts</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" class="rounded text-primary focus:ring-primary" checked>
+                                    <span class="ml-2">Lease expiration reminders</span>
+                                </label>
+                                <label class="flex items-center">
+                                    <input type="checkbox" class="rounded text-primary focus:ring-primary">
+                                    <span class="ml-2">Market analysis reports</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-500">Default Currency</label>
+                            <select class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary">
+                                <option>USD ($)</option>
+                                <option>EUR (€)</option>
+                                <option>GBP (£)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-500">Date Format</label>
+                            <select class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary">
+                                <option>MM/DD/YYYY</option>
+                                <option>DD/MM/YYYY</option>
+                                <option>YYYY-MM-DD</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Security -->
+            <div class="md:col-span-2">
+                <div class="bg-white rounded-xl shadow-md p-6">
+                    <h3 class="text-lg font-semibold mb-4">Security</h3>
+                    <div class="space-y-4">
+                        <button class="w-full bg-white text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 border border-gray-300">
+                            <i class="fas fa-key mr-2"></i>Change Password
+                        </button>
+                        <button class="w-full bg-white text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 border border-gray-300">
+                            <i class="fas fa-shield-alt mr-2"></i>Two-Factor Authentication
+                        </button>
+                        <button class="w-full bg-white text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 border border-gray-300">
+                            <i class="fas fa-history mr-2"></i>Login History
+                        </button>
+                        <button class="w-full bg-white text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 border border-gray-300">
+                            <i class="fas fa-user-shield mr-2"></i>API Keys
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Team Management -->
+            <div>
+                <div class="bg-white rounded-xl shadow-md p-6">
+                    <h3 class="text-lg font-semibold mb-4">Team Management</h3>
+                    <div class="space-y-4">
+                        <button class="w-full bg-white text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 border border-gray-300">
+                            <i class="fas fa-users mr-2"></i>Manage Team Members
+                        </button>
+                        <button class="w-full bg-white text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 border border-gray-300">
+                            <i class="fas fa-user-plus mr-2"></i>Add Team Member
+                        </button>
+                        <button class="w-full bg-white text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 border border-gray-300">
+                            <i class="fas fa-user-cog mr-2"></i>Role Permissions
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Edit Profile Modal -->
+        <div id="editProfileModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center">
+            <div class="bg-white rounded-xl p-6 w-full max-w-md">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold">Edit Profile</h3>
+                    <button onclick="closeEditModal()" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <form class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                        <input type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" value="John Smith">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                        <input type="email" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" value="john.smith@example.com">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                        <input type="tel" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" value="+1 (555) 123-4567">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Business Name</label>
+                        <input type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" value="Smith Property Management">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Business Phone</label>
+                        <input type="tel" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" value="+1 (555) 987-6543">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Business Address</label>
+                        <input type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" value="456 Business Street, Suite 100">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Tax ID</label>
+                        <input type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" value="12-3456789">
+                    </div>
+                    <div class="flex space-x-4">
+                        <button type="button" onclick="closeEditModal()" class="flex-1 bg-white text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-50 border border-gray-300">
+                            Cancel
+                        </button>
+                        <button type="submit" class="flex-1 bg-primary text-white py-2 px-4 rounded-lg hover:bg-blue-700">
+                            Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function openEditModal() {
+            document.getElementById('editProfileModal').classList.remove('hidden');
+            document.getElementById('editProfileModal').classList.add('flex');
+        }
+
+        function closeEditModal() {
+            document.getElementById('editProfileModal').classList.add('hidden');
+            document.getElementById('editProfileModal').classList.remove('flex');
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('editProfileModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeEditModal();
+            }
+        });
+    </script>
+</body>
+</html> 
