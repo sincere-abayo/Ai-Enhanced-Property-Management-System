@@ -1,3 +1,7 @@
+<?php include 'includes/auth.php';
+// requireRole('landlord');
+// requireLogin()
+ ?>
 
 <div class="fixed inset-y-0 left-0 bg-white shadow-lg max-h-screen w-64">
         <div class="flex flex-col justify-between h-full">

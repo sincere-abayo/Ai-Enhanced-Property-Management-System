@@ -1,0 +1,125 @@
+<?php
+session_start();
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rental Management System - Login</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#1a56db',
+            secondary: '#7e3af2',
+            success: '#0ea5e9',
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+  <!-- Main Container -->
+  <div class="bg-white shadow-2xl rounded-lg overflow-hidden w-full max-w-md">
+    <!-- Header Section -->
+    <div class="bg-primary p-6">
+      <h1 class="text-3xl font-bold text-white text-center">Rental Manager</h1>
+      <p class="text-sm text-blue-100 text-center mt-2">Efficiently manage your properties and tenants</p>
+    </div>
+
+    <!-- Login Form Section -->
+    <div class="p-8">
+      <?php if (isset($_SESSION['error'])): ?>
+        <div class="bg-red-100 border border-red-400 text-gray-700 px-4 py-3 rounded mb-4">
+          <?php echo $_SESSION['error'];  unset($_SESSION['error']); ?>
+        </div>
+      <?php endif; ?>
+      
+      <form action="login_process.php" method="POST">
+        <!-- Role Selection (Landlord/Tenant) -->
+        <div class="mb-6">
+          <label class="block text-sm font-medium text-gray-700">Login As</label>
+          <div class="mt-1 flex space-x-4">
+            <label class="inline-flex items-center">
+              <input
+                type="radio"
+                name="role"
+                value="landlord"
+                class="h-4 w-4 text-primary focus:ring-primary border-gray-300"
+                checked
+              />
+              <span class="ml-2 text-sm text-gray-700">Landlord</span>
+            </label>
+            <label class="inline-flex items-center">
+              <input
+                type="radio"
+                name="role"
+                value="tenant"
+                class="h-4 w-4 text-primary focus:ring-primary border-gray-300"
+              />
+              <span class="ml-2 text-sm text-gray-700">Tenant</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Email Input -->
+        <div class="mb-6">
+          <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            placeholder="Enter your email"
+            class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+            required
+          />
+        </div>
+
+        <!-- Password Input -->
+        <div class="mb-6">
+          <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+          <input
+            type="password"
+            id="password"
+            name="password"
+            placeholder="Enter your password"
+            class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+            required
+          />
+        </div>
+
+        <!-- Remember Me & Forgot Password -->
+        <div class="flex items-center justify-between mb-6">
+          <div class="flex items-center">
+            <input
+              type="checkbox"
+              id="remember"
+              name="remember"
+              class="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
+            />
+            <label for="remember" class="ml-2 block text-sm text-gray-700">Remember me</label>
+          </div>
+          <a href="forgot_password.php" class="text-sm text-primary hover:text-blue-700">Forgot password?</a>
+        </div>
+
+        <!-- Login Button -->
+        <button
+          type="submit"
+          class="w-full bg-primary text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+        >
+          Login
+        </button>
+      </form>
+
+<!-- Signup Link -->
+<!-- <div class="mt-6 text-center">
+  <p class="text-sm text-gray-600">Don't have an account? <a href="register.php" class="text-primary hover:text-blue-700">Sign up</a></p>
+</div> -->
+</div>
+</div>
+</body>
+</html>
