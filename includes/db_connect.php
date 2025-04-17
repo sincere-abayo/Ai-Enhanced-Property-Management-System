@@ -1,4 +1,7 @@
 <?php
+// add error reporting
+// ini_set('display_errors', 1);
+// ini_set('display_startup_errors', 1);
 $host = 'localhost';
 $dbname = 'property_management';
 $username = 'root';

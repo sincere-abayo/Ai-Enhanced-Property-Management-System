@@ -37,6 +37,11 @@ $current_page = basename($_SERVER['PHP_SELF']);
                         </a>
                     </li>
                     <li>
+                        <a href="messages.php" class="flex items-center <?php echo ($current_page == 'messages.php') ? 'bg-primary text-white' : 'text-gray-600 hover:bg-gray-100'; ?> rounded-xl font-bold text-sm py-3 px-4">
+                            <i class="fas fa-envelope w-6"></i>Messages
+                        </a>
+                    </li>
+                    <li>
                         <a href="reports.php" class="flex items-center <?php echo ($current_page == 'reports.php') ? 'bg-primary text-white' : 'text-gray-600 hover:bg-gray-100'; ?> rounded-xl font-bold text-sm py-3 px-4">
                             <i class="fas fa-chart-bar w-6"></i>Reports
                         </a>
@@ -45,7 +50,8 @@ $current_page = basename($_SERVER['PHP_SELF']);
             </div>
             
             <!-- User Profile Section -->
-            <div class="border-t p-4">
+                        <!-- User Profile Section -->
+                        <div class="border-t p-4">
                 <div class="flex items-center">
                     <div class="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold">
                         <?php 
@@ -58,7 +64,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
                         ?>
                     </div>
                     <div class="ml-3">
-                        <p class="text-sm font-medium text-gray-700">
+                        <a href="profile.php" class="text-sm font-medium text-gray-700 hover:text-primary">
                             <?php 
                             if (isset($_SESSION['first_name']) && isset($_SESSION['last_name'])) {
                                 echo htmlspecialchars($_SESSION['first_name'] . ' ' . $_SESSION['last_name']);
@@ -66,7 +72,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
                                 echo "User";
                             }
                             ?>
-                        </p>
+                        </a>
                         <p class="text-xs text-gray-500">
                             <?php 
                             if (isset($_SESSION['role'])) {
@@ -77,11 +83,17 @@ $current_page = basename($_SERVER['PHP_SELF']);
                     </div>
                 </div>
                 
-                <!-- Logout Button -->
-                <a href="../logout.php" class="mt-4 block text-center py-2 px-4 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 text-sm font-medium">
-                    <i class="fas fa-sign-out-alt mr-2"></i>Logout
-                </a>
+                <!-- Profile and Logout Buttons -->
+                <div class="mt-4 flex space-x-2">
+                    <a href="profile.php" class="flex-1 block text-center py-2 px-4 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 text-sm font-medium">
+                        <i class="fas fa-user-cog mr-2"></i>Profile
+                    </a>
+                    <a href="../logout.php" class="flex-1 block text-center py-2 px-4 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 text-sm font-medium">
+                        <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                    </a>
+                </div>
             </div>
+
         </div>
     </div>
 </div>

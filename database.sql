@@ -204,3 +204,14 @@ ALTER TABLE messages
 ADD COLUMN thread_id INT AFTER message_id,
 ADD FOREIGN KEY (thread_id) REFERENCES message_threads(thread_id) ON DELETE CASCADE;
 
+-- Create password_resets table if it doesn't exist
+CREATE TABLE IF NOT EXISTS password_resets (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    email VARCHAR(100) NOT NULL,
+    token VARCHAR(100) NOT NULL,
+    expires_at DATETIME NOT NULL,
+    is_valid BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX (email),
+    INDEX (token)
+);
