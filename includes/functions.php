@@ -315,4 +315,23 @@ function getDueText($dateString) {
         return 'Due in ' . $diff->d . ' day' . ($diff->d > 1 ? 's' : '');
     }
 }
+function timeAgo($datetime) {
+    $now = new DateTime();
+    $ago = new DateTime($datetime);
+    $diff = $now->diff($ago);
+    
+    if ($diff->d > 0) {
+        return $diff->d . ' day' . ($diff->d > 1 ? 's' : '') . ' ago';
+    }
+    
+    if ($diff->h > 0) {
+        return $diff->h . ' hour' . ($diff->h > 1 ? 's' : '') . ' ago';
+    }
+    
+    if ($diff->i > 0) {
+        return $diff->i . ' minute' . ($diff->i > 1 ? 's' : '') . ' ago';
+    }
+    
+    return 'Just now';
+}
 ?>

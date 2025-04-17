@@ -1,7 +1,5 @@
 <?php
-// add error reporting
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
+
 error_reporting(E_ALL);
 require_once '../includes/db_connect.php';
 require_once '../includes/auth.php';
@@ -60,12 +58,89 @@ $upcomingTasks = getUpcomingTasks($userId);
                 <p class="text-gray-600">Here's what's happening with your properties today</p>
             </div>
             <div class="flex space-x-4">
-                <a href="notifications.php" class="bg-white text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 border border-gray-300">
-                    <i class="fas fa-bell mr-2"></i>Notifications
-                </a>
-                <a href="add_property.php" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-blue-700">
-                    <i class="fas fa-plus mr-2"></i>Add Property
-                </a>
+              <div>
+                <div class="relative ml-3">
+                    <button id="notificationButton" class="relative p-1 text-gray-600 hover:text-gray-900 focus:outline-none">
+                        <i class="fas fa-bell text-xl"></i>
+                        <?php
+                        // Get unread notification count
+                        $stmt = $pdo->prepare("SELECT COUNT(*) as count FROM notifications WHERE user_id = ? AND is_read = 0");
+                        $stmt->execute([$userId]);
+                        $unreadCount = $stmt->fetch()['count'];
+                        
+                        if ($unreadCount > 0):
+                        ?>
+                        <span class="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full">
+                            <?php echo $unreadCount; ?>
+                        </span>
+                        <?php endif; ?>
+                    </button>
+                    
+                    <!-- Dropdown menu -->
+                    <div id="notificationDropdown" class="hidden absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg py-1 z-10">
+                        <div class="px-4 py-2 border-b border-gray-200">
+                        <div class="flex justify-between items-center">
+    <h3 class="text-sm font-semibold text-gray-700">Notifications</h3>
+    <?php if ($unreadCount > 0): ?>
+    <a href="#" id="markAllReadBtn" class="text-xs text-primary hover:text-blue-700">Mark all as read</a>
+    <?php endif; ?>
+</div>
+
+                        </div>
+                        
+                        <div class="max-h-64 overflow-y-auto">
+                            <?php
+                            // Get recent notifications
+                            $stmt = $pdo->prepare("
+                                SELECT * FROM notifications 
+                                WHERE user_id = ? 
+                                ORDER BY created_at DESC 
+                                LIMIT 5
+                            ");
+                            $stmt->execute([$userId]);
+                            $notifications = $stmt->fetchAll();
+                            
+                            if (empty($notifications)):
+                            ?>
+                            <div class="px-4 py-3 text-sm text-gray-500 text-center">
+                                No notifications
+                            </div>
+                            <?php else: ?>
+                                <?php foreach ($notifications as $notification): ?>
+                                <a href="view_notification.php?id=<?php echo $notification['notification_id']; ?>" class="block px-4 py-2 hover:bg-gray-200 <?php echo $notification['is_read'] ? '' : 'bg-blue-50'; ?>">
+                                    <div class="flex items-start">
+                                        <div class="flex-shrink-0 pt-1">
+                                            <?php if ($notification['type'] === 'payment'): ?>
+                                                <i class="fas fa-money-bill-wave text-green-500"></i>
+                                            <?php elseif ($notification['type'] === 'maintenance'): ?>
+                                                <i class="fas fa-tools text-yellow-500"></i>
+                                            <?php elseif ($notification['type'] === 'lease'): ?>
+                                                <i class="fas fa-file-contract text-blue-500"></i>
+                                            <?php else: ?>
+                                                <i class="fas fa-bell text-gray-500"></i>
+                                            <?php endif; ?>
+                                        </div>
+                                        <div class="rounded-lg ml-3">
+                                            <p class="text-sm font-medium text-gray-900"><?php echo htmlspecialchars(mb_strimwidth($notification['title'], 0, 30, "...")); ?></p>
+                                            <p class="text-xs text-gray-500 truncate"><?php echo htmlspecialchars(mb_strimwidth($notification['message'], 0, 20, "...")); ?></p>
+                                            <p class="text-xs text-gray-400 mt-1"><?php echo timeAgo($notification['created_at']); ?></p>
+                                        </div>
+                                    </div>
+                                </a>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </div>
+                        
+                        <div class="px-4 py-2 border-t border-gray-200">
+                            <a href="notifications.php" class="block text-center text-sm text-primary hover:text-blue-700">
+                                View all notifications
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+              </div>
+               
             </div>
         </div>
 
@@ -129,7 +204,7 @@ $upcomingTasks = getUpcomingTasks($userId);
             <div class="bg-white rounded-xl shadow-md p-6">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="text-lg font-semibold">Recent Activities</h3>
-                    <a href="activities.php" class="text-primary text-sm hover:text-blue-700">View All</a>
+                    <!-- <a href="activities.php" class="text-primary text-sm hover:text-blue-700">View All</a> -->
                 </div>
                 <div class="space-y-4">
                     <?php if (empty($recentActivities)): ?>
@@ -164,7 +239,7 @@ $upcomingTasks = getUpcomingTasks($userId);
             <div class="bg-white rounded-xl shadow-md p-6">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="text-lg font-semibold">Upcoming Tasks</h3>
-                    <a href="tasks.php" class="text-primary text-sm hover:text-blue-700">View All</a>
+                    <!-- <a href="tasks.php" class="text-primary text-sm hover:text-blue-700">View All</a> -->
                 </div>
                 <div class="space-y-4">
                     <?php if (empty($upcomingTasks)): ?>
@@ -202,7 +277,7 @@ $upcomingTasks = getUpcomingTasks($userId);
         </div>
 
         <!-- Quick Actions -->
-        <div class="mt-8">
+        <!-- <div class="mt-8">
             <h3 class="text-lg font-semibold mb-4">Quick Actions</h3>
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <a href="add_property.php" class="bg-white p-4 rounded-xl shadow-md hover:shadow-lg transition-shadow">
@@ -238,7 +313,96 @@ $upcomingTasks = getUpcomingTasks($userId);
                     </div>
                 </a>
             </div>
-        </div>
+        </div> -->
     </div>
+    <script>
+    // Toggle notification dropdown
+    document.getElementById('notificationButton').addEventListener('click', function() {
+        document.getElementById('notificationDropdown').classList.toggle('hidden');
+    });
+    
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(event) {
+        const dropdown = document.getElementById('notificationDropdown');
+        const button = document.getElementById('notificationButton');
+        
+        if (!dropdown.contains(event.target) && !button.contains(event.target)) {
+            dropdown.classList.add('hidden');
+        }
+    });
+    // Add this to the existing script section or create a new one
+document.addEventListener('DOMContentLoaded', function() {
+    const markAllReadBtn = document.getElementById('markAllReadBtn');
+    
+    if (markAllReadBtn) {
+        markAllReadBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Show loading state
+            markAllReadBtn.innerHTML = 'Processing...';
+            markAllReadBtn.classList.add('opacity-50');
+            
+            // Send AJAX request to mark all as read
+            fetch('mark_all_read.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({
+                    action: 'mark_all_read'
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update UI to reflect all notifications are read
+                    const notificationBadge = document.querySelector('.fa-bell + span');
+                    if (notificationBadge) {
+                        notificationBadge.style.display = 'none';
+                    }
+                    
+                    // Remove highlighting from unread notifications
+                    const unreadNotifications = document.querySelectorAll('.bg-blue-50');
+                    unreadNotifications.forEach(notification => {
+                        notification.classList.remove('bg-blue-50');
+                    });
+                    
+                    // Hide the "Mark all as read" button
+                    markAllReadBtn.style.display = 'none';
+                    
+                    // Show success message
+                    const notificationHeader = document.querySelector('.px-4.py-2.border-b.border-gray-200');
+                    const successMsg = document.createElement('div');
+                    successMsg.className = 'text-xs text-green-600 mt-1';
+                    successMsg.textContent = 'All notifications marked as read';
+                    notificationHeader.appendChild(successMsg);
+                    
+                    // Remove success message after 3 seconds
+                    setTimeout(() => {
+                        successMsg.remove();
+                    }, 3000);
+                } else {
+                    // Show error message
+                    markAllReadBtn.innerHTML = 'Error. Try again';
+                    setTimeout(() => {
+                        markAllReadBtn.innerHTML = 'Mark all as read';
+                        markAllReadBtn.classList.remove('opacity-50');
+                    }, 2000);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                markAllReadBtn.innerHTML = 'Error. Try again';
+                setTimeout(() => {
+                    markAllReadBtn.innerHTML = 'Mark all as read';
+                    markAllReadBtn.classList.remove('opacity-50');
+                }, 2000);
+            });
+        });
+    }
+});
+
+</script>
 </body>
 </html>

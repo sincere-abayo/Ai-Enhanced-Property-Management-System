@@ -142,3 +142,65 @@ CREATE TABLE ai_insights (
     FOREIGN KEY (property_id) REFERENCES properties(property_id) ON DELETE SET NULL,
     FOREIGN KEY (tenant_id) REFERENCES users(user_id) ON DELETE SET NULL
 );
+
+
+-- new tables
+-- Messages table for communication between landlords and tenants
+CREATE TABLE messages (
+    message_id INT AUTO_INCREMENT PRIMARY KEY,
+    sender_id INT NOT NULL,
+    recipient_id INT NOT NULL,
+    subject VARCHAR(255) NOT NULL,
+    message TEXT NOT NULL,
+    message_type ENUM('portal', 'email', 'sms', 'both') NOT NULL DEFAULT 'portal',
+    is_read BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (sender_id) REFERENCES users(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (recipient_id) REFERENCES users(user_id) ON DELETE CASCADE
+);
+
+ALTER TABLE payments 
+ADD COLUMN status ENUM('active', 'voided') DEFAULT 'active',
+ADD COLUMN voided_at TIMESTAMP NULL,
+ADD COLUMN voided_by INT NULL,
+ADD COLUMN void_reason TEXT NULL,
+ADD FOREIGN KEY (voided_by) REFERENCES users(user_id) ON DELETE SET NULL;
+
+-- Create payment audit table for tracking changes
+CREATE TABLE payment_audit (
+    audit_id INT AUTO_INCREMENT PRIMARY KEY,
+    payment_id INT NOT NULL,
+    action ENUM('create', 'update', 'void') NOT NULL,
+    action_by INT NOT NULL,
+    action_reason TEXT,
+    action_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (payment_id) REFERENCES payments(payment_id) ON DELETE CASCADE,
+    FOREIGN KEY (action_by) REFERENCES users(user_id) ON DELETE CASCADE
+);
+
+-- Update payment_audit table to include restore action
+ALTER TABLE payment_audit 
+MODIFY COLUMN action ENUM('create', 'update', 'void', 'restore') NOT NULL;
+
+- Message threads table
+CREATE TABLE message_threads (
+    thread_id INT AUTO_INCREMENT PRIMARY KEY,
+    subject VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- Thread participants table
+CREATE TABLE thread_participants (
+    thread_id INT NOT NULL,
+    user_id INT NOT NULL,
+    is_read BOOLEAN DEFAULT FALSE,
+    PRIMARY KEY (thread_id, user_id),
+    FOREIGN KEY (thread_id) REFERENCES message_threads(thread_id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+);
+
+ALTER TABLE messages 
+ADD COLUMN thread_id INT AFTER message_id,
+ADD FOREIGN KEY (thread_id) REFERENCES message_threads(thread_id) ON DELETE CASCADE;
+

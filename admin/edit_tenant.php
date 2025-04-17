@@ -238,6 +238,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </div>
                 </div>
 
+
                 <div class="flex justify-end space-x-4 mt-6">
                     <a 
                         href="tenant_details.php?id=<?php echo $tenantId; ?>" 

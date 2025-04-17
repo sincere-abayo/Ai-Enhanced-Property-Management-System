@@ -147,7 +147,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_tenant'])) {
             $pdo->beginTransaction();
             
             // Create user account
-            $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+            // $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
             $stmt = $pdo->prepare("
                 INSERT INTO users (
                     email, password, first_name, last_name, phone, role
@@ -158,7 +158,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_tenant'])) {
             
             $stmt->execute([
                 'email' => $email,
-                'password' => $hashedPassword,
+                'password' => $password,
                 'firstName' => $firstName,
                 'lastName' => $lastName,
                 'phone' => $phone

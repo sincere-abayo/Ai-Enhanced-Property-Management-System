@@ -138,7 +138,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['record_payment'])) {
             ]);
             
             $_SESSION['success'] = "Payment recorded successfully!";
-            header("Location: " . $returnUrl);
+    // Determine where to redirect based on the parameters
+    if (isset($_GET['property_id'])) {
+        header("Location: property_details.php?id=" . $_GET['property_id']);
+    } elseif (isset($_GET['tenant_id'])) {
+        header("Location: tenant_details.php?id=" . $_GET['tenant_id']);
+    } else {
+        header("Location: dashboard.php");
+    }
+    exit;
+} catch (PDOException $e) {
+    $errors[] = "Database error: " . $e->getMessage();
               exit;
         } catch (PDOException $e) {
             $errors[] = "Database error: " . $e->getMessage();
@@ -217,8 +227,8 @@ function formatCurrency($amount) {
         <?php else: ?>
             <!-- Payment Form -->
             <div class="bg-white rounded-xl shadow-md p-6 mb-8">
-                <form method="POST" action="record_payment.php?property_id=<?php echo $propertyId; ?>" class="space-y-6">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <form method="POST" action="record_payment.php?<?php echo isset($propertyId) ? 'property_id='.$propertyId : 'tenant_id='.$tenantId; ?>" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Lease / Tenant</label>
                             <select name="lease_id" required class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring-primary">
