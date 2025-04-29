@@ -267,9 +267,7 @@ $upcomingTasks = getUpcomingTasks($userId);
                                         <p class="text-xs text-gray-500"><?php echo getDueText($task['date']); ?></p>
                                     </div>
                                 </div>
-                                <button class="text-primary hover:text-blue-700">
-                                    <i class="fas fa-ellipsis-v"></i>
-                                </button>
+                               
                             </div>
                         <?php endforeach; ?>
                     <?php endif; ?>

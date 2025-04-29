@@ -411,6 +411,8 @@ function formatCurrency($amount) {
         </div>
     </div>
 </div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 
     <script>
         // Toggle filters visibility
@@ -424,10 +426,68 @@ function formatCurrency($amount) {
             document.getElementById('filtersContainer').classList.remove('hidden');
         <?php endif; ?>
 
-        // Export payments to CSV
-        function exportPayments() {
-            window.location.href = 'export_payments.php<?php echo $_SERVER['QUERY_STRING'] ? '?' . $_SERVER['QUERY_STRING'] : ''; ?>';
+               // Export payments to PDF using jsPDF
+               function exportPayments() {
+            // Create a new jsPDF instance
+            const doc = new jspdf.jsPDF();
+            
+            // Set title
+            doc.setFontSize(18);
+            doc.text('Payments Report', 14, 22);
+            doc.setFontSize(11);
+            doc.text('Generated on: ' + new Date().toLocaleDateString(), 14, 30);
+            
+            // Get the payments table
+            const table = document.querySelector('.min-w-full');
+            
+            // Extract table data (excluding the Actions column)
+            const tableData = [];
+            const headers = [];
+            
+            // Get headers (excluding Actions column)
+            const headerCells = table.querySelectorAll('thead th');
+            headerCells.forEach((cell, index) => {
+                if (index < headerCells.length - 1) { // Skip the Actions column
+                    headers.push(cell.textContent.trim());
+                }
+            });
+            tableData.push(headers);
+            
+            // Get rows
+            const rows = table.querySelectorAll('tbody tr');
+            rows.forEach(row => {
+                const rowData = [];
+                const cells = row.querySelectorAll('td');
+                cells.forEach((cell, index) => {
+                    if (index < cells.length - 1) { // Skip the Actions column
+                        // Get text content without HTML tags
+                        let content = cell.textContent.trim();
+                        rowData.push(content);
+                    }
+                });
+                tableData.push(rowData);
+            });
+            
+            // Add table to PDF
+            doc.autoTable({
+                head: [tableData[0]],
+                body: tableData.slice(1),
+                startY: 40,
+                theme: 'grid',
+                styles: {
+                    fontSize: 9,
+                    cellPadding: 3
+                },
+                headStyles: {
+                    fillColor: [26, 86, 219],
+                    textColor: 255
+                }
+            });
+            
+            // Save the PDF
+            doc.save('payments_report.pdf');
         }
+
 
         // Delete confirmation
         function confirmDelete(paymentId) {

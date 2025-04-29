@@ -328,9 +328,7 @@ $properties = getProperties($userId, $status, $propertyType, $priceRange, $searc
                                 View Details
                             </a>
 
-                                <button class="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200">
-                                    <i class="fas fa-ellipsis-v"></i>
-                                </button>
+                               
                             </div>
                         </div>
                     </div>
