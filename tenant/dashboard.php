@@ -133,7 +133,7 @@ function formatCurrency($amount) {
                 <h2 class="text-2xl font-bold text-gray-800">Welcome back, <?php echo htmlspecialchars($firstName); ?>!</h2>
                 <p class="text-gray-600">Here's your property overview</p>
             </div>
-            <div class="flex space-x-4">
+            <div class="flex space-x-4 hidden sm:hidden">
                 <a href="notifications.php" class="relative bg-white text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 border border-gray-300">
                     <i class="fas fa-bell mr-2"></i>Notifications
                     <?php if ($unreadNotificationsCount > 0): ?>
@@ -308,8 +308,8 @@ function formatCurrency($amount) {
                     
                     <?php foreach ($maintenanceRequests as $request): ?>
                         <div class="flex items-center p-3 bg-gray-50 rounded-lg">
-                            <div class="p-2 rounded-full bg-<?php echo $request['status_color']; ?>-100">
-                                <i class="fas fa-tools text-<?php echo $request['status_color']; ?>-500"></i>
+                            <div class="p-2 rounded-full bg-<?php echo $request['status_color'] ?? 'pending' ?>-100">
+                                <i class="fas fa-tools text-<?php echo $request['status_color']?? 'pending' ?>-500"></i>
                             </div>
                             <div class="ml-4">
                                 <p class="text-sm font-medium">
