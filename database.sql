@@ -2,7 +2,7 @@ CREATE DATABASE property_management;
 USE property_management;
 
 -- Users table (for both landlords and tenants)
-CREATE TABLE users (
+CREATE TABLE IF NOT EXISTS users (
     user_id INT AUTO_INCREMENT PRIMARY KEY,
     email VARCHAR(100) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
@@ -15,7 +15,7 @@ CREATE TABLE users (
 );
 
 -- Properties table
-CREATE TABLE properties (
+CREATE TABLE IF NOT EXISTS properties (
     property_id INT AUTO_INCREMENT PRIMARY KEY,
     landlord_id INT NOT NULL,
     property_name VARCHAR(100) NOT NULL,
@@ -36,7 +36,7 @@ CREATE TABLE properties (
 );
 
 -- Units table (for properties with multiple units)
-CREATE TABLE units (
+CREATE TABLE IF NOT EXISTS units (
     unit_id INT AUTO_INCREMENT PRIMARY KEY,
     property_id INT NOT NULL,
     unit_number VARCHAR(20) NOT NULL,
@@ -51,7 +51,7 @@ CREATE TABLE units (
 );
 
 -- Leases table
-CREATE TABLE leases (
+CREATE TABLE IF NOT EXISTS leases (
     lease_id INT AUTO_INCREMENT PRIMARY KEY,
     property_id INT NOT NULL,
     unit_id INT,
@@ -64,13 +64,14 @@ CREATE TABLE leases (
     status ENUM('active', 'expired', 'terminated') DEFAULT 'active',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    image_path  VARCHAR(255) NULL DEFAULT NULL,
     FOREIGN KEY (property_id) REFERENCES properties(property_id) ON DELETE CASCADE,
     FOREIGN KEY (unit_id) REFERENCES units(unit_id) ON DELETE SET NULL,
     FOREIGN KEY (tenant_id) REFERENCES users(user_id) ON DELETE CASCADE
 );
 
 -- Payments table
-CREATE TABLE payments (
+CREATE TABLE IF NOT EXISTS payments (
     payment_id INT AUTO_INCREMENT PRIMARY KEY,
     lease_id INT NOT NULL,
     amount DECIMAL(10,2) NOT NULL,
@@ -80,10 +81,11 @@ CREATE TABLE payments (
     notes TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (lease_id) REFERENCES leases(lease_id) ON DELETE CASCADE
+
 );
 
 -- Maintenance requests table
-CREATE TABLE maintenance_requests (
+CREATE TABLE IF NOT EXISTS maintenance_requests (
     request_id INT AUTO_INCREMENT PRIMARY KEY,
     property_id INT NOT NULL,
     unit_id INT,
@@ -104,7 +106,7 @@ CREATE TABLE maintenance_requests (
 );
 
 -- Maintenance tasks table
-CREATE TABLE maintenance_tasks (
+CREATE TABLE IF NOT EXISTS maintenance_tasks (
     task_id INT AUTO_INCREMENT PRIMARY KEY,
     request_id INT NOT NULL,
     assigned_to INT,
@@ -118,7 +120,7 @@ CREATE TABLE maintenance_tasks (
 );
 
 -- Notifications table
-CREATE TABLE notifications (
+CREATE TABLE IF NOT EXISTS notifications (
     notification_id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
     title VARCHAR(100) NOT NULL,
@@ -130,7 +132,7 @@ CREATE TABLE notifications (
 );
 
 -- AI Insights table
-CREATE TABLE ai_insights (
+CREATE TABLE IF NOT EXISTS ai_insights (
     insight_id INT AUTO_INCREMENT PRIMARY KEY,
     landlord_id INT NOT NULL,
     property_id INT,
@@ -146,7 +148,7 @@ CREATE TABLE ai_insights (
 
 -- new tables
 -- Messages table for communication between landlords and tenants
-CREATE TABLE messages (
+CREATE TABLE IF NOT EXISTS messages (
     message_id INT AUTO_INCREMENT PRIMARY KEY,
     sender_id INT NOT NULL,
     recipient_id INT NOT NULL,
@@ -167,7 +169,7 @@ ADD COLUMN void_reason TEXT NULL,
 ADD FOREIGN KEY (voided_by) REFERENCES users(user_id) ON DELETE SET NULL;
 
 -- Create payment audit table for tracking changes
-CREATE TABLE payment_audit (
+CREATE TABLE IF NOT EXISTS payment_audit (
     audit_id INT AUTO_INCREMENT PRIMARY KEY,
     payment_id INT NOT NULL,
     action ENUM('create', 'update', 'void') NOT NULL,
@@ -182,8 +184,8 @@ CREATE TABLE payment_audit (
 ALTER TABLE payment_audit 
 MODIFY COLUMN action ENUM('create', 'update', 'void', 'restore') NOT NULL;
 
-- Message threads table
-CREATE TABLE message_threads (
+-- Message threads table
+CREATE TABLE  IF NOT EXISTS message_threads (
     thread_id INT AUTO_INCREMENT PRIMARY KEY,
     subject VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -191,7 +193,7 @@ CREATE TABLE message_threads (
 );
 
 -- Thread participants table
-CREATE TABLE thread_participants (
+CREATE TABLE IF NOT EXISTS thread_participants (
     thread_id INT NOT NULL,
     user_id INT NOT NULL,
     is_read BOOLEAN DEFAULT FALSE,

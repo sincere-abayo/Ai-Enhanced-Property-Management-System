@@ -12,7 +12,7 @@ $userId = $_SESSION['user_id'];
 // Get tenant's active leases
 $stmt = $pdo->prepare("
     SELECT l.*, 
-           p.property_name, p.address, p.city, p.state, p.zip_code, p.property_type,
+           p.property_name, p.address, p.city, p.state, p.zip_code, p.property_type,p.landlord_id,
            u.unit_number, u.bedrooms, u.bathrooms,
            o.first_name as landlord_first_name, o.last_name as landlord_last_name,
            o.email as landlord_email, o.phone as landlord_phone
