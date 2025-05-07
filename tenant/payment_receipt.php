@@ -119,10 +119,14 @@ if ($payment['unit_number']) {
                 <p class="text-gray-600">Receipt #<?php echo $receiptNumber; ?></p>
             </div>
             <div class="ml-auto">
-                <button onclick="window.print()" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-blue-700">
-                    <i class="fas fa-print mr-2"></i>Print Receipt
-                </button>
-            </div>
+    <button onclick="window.print()" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-blue-700 mr-2">
+        <i class="fas fa-print mr-2"></i>Print Receipt
+    </button>
+    <button onclick="downloadReceiptAsPDF()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
+        <i class="fas fa-download mr-2"></i>Download PDF
+    </button>
+</div>
+
         </div>
     </div>
 
@@ -215,5 +219,72 @@ if ($payment['unit_number']) {
             </div>
         </div>
     </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script>
+    function downloadReceiptAsPDF() {
+        // Show loading indicator
+        const loadingIndicator = document.createElement('div');
+        loadingIndicator.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+        loadingIndicator.innerHTML = '<div class="bg-white p-4 rounded-lg"><p class="text-gray-800">Generating PDF...</p></div>';
+        document.body.appendChild(loadingIndicator);
+        
+        // Get the receipt container
+        const receiptElement = document.querySelector('.print-container');
+        
+        // Set options for html2canvas
+        const options = {
+            scale: 2, // Higher scale for better quality
+            useCORS: true,
+            allowTaint: true,
+            scrollX: 0,
+            scrollY: 0
+        };
+        
+        // Use html2canvas to capture the receipt as an image
+        html2canvas(receiptElement, options).then(canvas => {
+            // Create a new jsPDF instance
+            const doc = new jspdf.jsPDF({
+                orientation: 'portrait',
+                unit: 'mm',
+                format: 'a4'
+            });
+            
+            // Calculate dimensions to fit the receipt on the page
+            const imgData = canvas.toDataURL('image/png');
+            const pageWidth = doc.internal.pageSize.getWidth();
+            const pageHeight = doc.internal.pageSize.getHeight();
+            
+            const canvasWidth = canvas.width;
+            const canvasHeight = canvas.height;
+            
+            // Calculate the scale to fit the width of the page
+            const scale = pageWidth / canvasWidth;
+            const scaledHeight = canvasHeight * scale;
+            
+            // If the scaled height is greater than the page height, adjust the scale
+            const finalScale = scaledHeight > pageHeight ? pageHeight / scaledHeight * scale : scale;
+            
+            const finalWidth = canvasWidth * finalScale;
+            const finalHeight = canvasHeight * finalScale;
+            
+            // Add the image to the PDF
+            doc.addImage(imgData, 'PNG', 
+                (pageWidth - finalWidth) / 2, // Center horizontally
+                10, // Top margin
+                finalWidth, 
+                finalHeight
+            );
+            
+            // Save the PDF with a meaningful filename
+            const receiptNumber = '<?php echo $receiptNumber; ?>';
+            doc.save('Payment_Receipt_' + receiptNumber + '.pdf');
+            
+            // Remove loading indicator
+            document.body.removeChild(loadingIndicator);
+        });
+    }
+</script>
+
 </body>
 </html>

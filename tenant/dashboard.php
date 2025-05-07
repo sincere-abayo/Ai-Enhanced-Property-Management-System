@@ -133,16 +133,85 @@ function formatCurrency($amount) {
                 <h2 class="text-2xl font-bold text-gray-800">Welcome back, <?php echo htmlspecialchars($firstName); ?>!</h2>
                 <p class="text-gray-600">Here's your property overview</p>
             </div>
-            <div class="flex space-x-4 hidden sm:hidden">
-                <a href="notifications.php" class="relative bg-white text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 border border-gray-300">
-                    <i class="fas fa-bell mr-2"></i>Notifications
-                    <?php if ($unreadNotificationsCount > 0): ?>
-                    <span class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                        <?php echo $unreadNotificationsCount; ?>
-                    </span>
-                    <?php endif; ?>
-                </a>
+            <div class="flex space-x-4">
+              <div>
+                <div class="relative ml-3">
+                    <button id="notificationButton" class="relative p-1 text-gray-600 hover:text-gray-900 focus:outline-none">
+                        <i class="fas fa-bell text-xl"></i>
+                        <?php if ($unreadNotificationsCount > 0): ?>
+                        <span class="absolute top-0 right-0 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full">
+                            <?php echo $unreadNotificationsCount; ?>
+                        </span>
+                        <?php endif; ?>
+                    </button>
+                    
+                    <!-- Dropdown menu -->
+                    <div id="notificationDropdown" class="hidden absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg py-1 z-10">
+                        <div class="px-4 py-2 border-b border-gray-200">
+                            <div class="flex justify-between items-center">
+                                <h3 class="text-sm font-semibold text-gray-700">Notifications</h3>
+                                <?php if ($unreadNotificationsCount > 0): ?>
+                                <a href="#" id="markAllReadBtn" class="text-xs text-primary hover:text-blue-700">Mark all as read</a>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                        
+                        <div class="max-h-64 overflow-y-auto">
+                            <?php
+                            // Get recent notifications
+                            $stmt = $pdo->prepare("
+                                SELECT * FROM notifications 
+                                WHERE user_id = ? 
+                                ORDER BY created_at DESC 
+                                LIMIT 5
+                            ");
+                            $stmt->execute([$userId]);
+                            $notifications = $stmt->fetchAll();
+                            
+                            if (empty($notifications)):
+                            ?>
+                            <div class="px-4 py-3 text-sm text-gray-500 text-center">
+                                No notifications
+                            </div>
+                            <?php else: ?>
+                                <?php foreach ($notifications as $notification): ?>
+                                <a href="view_notification.php?id=<?php echo $notification['notification_id']; ?>" class="block px-4 py-2 hover:bg-gray-200 <?php echo $notification['is_read'] ? '' : 'bg-blue-50'; ?>">
+                                    <div class="flex items-start">
+                                        <div class="flex-shrink-0 pt-1">
+                                            <?php if ($notification['type'] === 'payment'): ?>
+                                                <i class="fas fa-money-bill-wave text-green-500"></i>
+                                            <?php elseif ($notification['type'] === 'maintenance'): ?>
+                                                <i class="fas fa-tools text-yellow-500"></i>
+                                            <?php elseif ($notification['type'] === 'lease'): ?>
+                                                <i class="fas fa-file-contract text-blue-500"></i>
+                                            <?php else: ?>
+                                                <i class="fas fa-bell text-gray-500"></i>
+                                            <?php endif; ?>
+                                        </div>
+                                        <div class="rounded-lg ml-3">
+                                            <p class="text-sm font-medium text-gray-900"><?php echo htmlspecialchars(mb_strimwidth($notification['title'], 0, 30, "...")); ?></p>
+                                            <p class="text-xs text-gray-500 truncate"><?php echo htmlspecialchars(mb_strimwidth($notification['message'], 0, 20, "...")); ?></p>
+                                            <p class="text-xs text-gray-400 mt-1"><?php echo timeAgo($notification['created_at']); ?></p>
+                                        </div>
+                                    </div>
+                                </a>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </div>
+                        
+                        <div class="px-4 py-2 border-t border-gray-200">
+                            <a href="notifications.php" class="block text-center text-sm text-primary hover:text-blue-700">
+                                View all notifications
+                            </a>
+                        </div>
+                    </div>
+                </div>
+              </div>
+               
+              
             </div>
+
+
         </div>
 
         <?php if (!$lease): ?>
@@ -326,5 +395,65 @@ function formatCurrency($amount) {
             </div>
         </div>
     </div>
+    <script>
+    // Notification dropdown functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const notificationButton = document.getElementById('notificationButton');
+        const notificationDropdown = document.getElementById('notificationDropdown');
+        const markAllReadBtn = document.getElementById('markAllReadBtn');
+        
+        if (notificationButton && notificationDropdown) {
+            // Toggle dropdown when clicking the notification button
+            notificationButton.addEventListener('click', function(e) {
+                e.stopPropagation();
+                notificationDropdown.classList.toggle('hidden');
+            });
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!notificationDropdown.contains(e.target) && e.target !== notificationButton) {
+                    notificationDropdown.classList.add('hidden');
+                }
+            });
+            
+            // Mark all as read functionality
+            if (markAllReadBtn) {
+                markAllReadBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    // Send AJAX request to mark all as read
+                    fetch('mark_all_read.php', {
+                        method: 'POST',
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Update UI to reflect all notifications are read
+                            document.querySelectorAll('.bg-blue-50').forEach(el => {
+                                el.classList.remove('bg-blue-50');
+                            });
+                            
+                            // Remove notification count badge
+                            const badge = document.querySelector('.absolute.top-0.right-0.inline-flex');
+                            if (badge) {
+                                badge.remove();
+                            }
+                            
+                            // Hide the "Mark all as read" button
+                            markAllReadBtn.style.display = 'none';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                    });
+                });
+            }
+        }
+    });
+</script>
+
 </body>
 </html>
