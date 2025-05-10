@@ -15,7 +15,7 @@
                 <div class="h-8 w-8 rounded-full bg-white bg-opacity-20 flex items-center justify-center mr-3">
                     <i class="fas fa-robot"></i>
                 </div>
-                <h3 class="font-medium">Property Assistant</h3>
+                <h3 class="font-medium">AI Property Assistant</h3>
             </div>
             <button id="minimizeChat" class="text-white hover:text-gray-200 focus:outline-none">
                 <i class="fas fa-minus"></i>

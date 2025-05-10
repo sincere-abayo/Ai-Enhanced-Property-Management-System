@@ -132,7 +132,7 @@ function processUserMessage($userMessage, $tenantId, $conversationId) {
         $response .= " issue. ";
         
         if ($urgency === 'high') {
-            $response .= "This appears to be urgent. Please contact emergency maintenance at [EMERGENCY_PHONE] immediately. ";
+            $response .= "This appears to be urgent. Please contact emergency maintenance at 0788459654 immediately. ";
         } else {
             $response .= "Here are some quick troubleshooting steps:\n\n";
             
@@ -519,28 +519,75 @@ function handlePaymentQuery($userMessage, $tenantId) {
         
         return $response;
     }
-    else if (strpos($message, 'balance') !== false || strpos($message, 'owe') !== false) {
-        // Balance query
-        // This would require additional logic to calculate current balance
-        // For now, just return the monthly rent amount
-        return "Your monthly rent is $" . number_format($paymentInfo['monthly_rent'], 2) . 
-               ". It's due on the " . $paymentInfo['payment_due_day'] . 
-               "th day of each month.";
-    }
+    else if (strpos($message, 'balance') !== false || 
+    strpos($message, 'owe') !== false || 
+    strpos($message, 'behind') !== false || 
+    strpos($message, 'paid') !== false || 
+    strpos($message, 'current') !== false) {
+// Balance query - check if there's an outstanding balance
+$dueDate = date('F j, Y', strtotime($paymentInfo['next_due_date']));
+$today = date('Y-m-d');
+$dueDayWithSuffix = getOrdinalSuffix($paymentInfo['payment_due_day']);
+
+if (strtotime($today) > strtotime($paymentInfo['next_due_date'])) {
+   return "You have an outstanding balance of $" . number_format($paymentInfo['monthly_rent'], 2) . 
+          " that was due on " . $dueDate . ". Please make your payment as soon as possible.";
+} else {
+   return "You don't have any outstanding balance. Your next payment of $" . 
+          number_format($paymentInfo['monthly_rent'], 2) . " is due on " . $dueDate . ".";
+}
+}
+
+
     else if (strpos($message, 'how') !== false && strpos($message, 'pay') !== false) {
         // How to pay query
         return "You can pay your rent through the Payments section of your tenant dashboard. " .
                "We accept credit cards, bank transfers, and other payment methods. " .
                "Your monthly rent is $" . number_format($paymentInfo['monthly_rent'], 2) . ".";
     }
+    else if (strpos($message, 'late fee') !== false || strpos($message, 'penalty') !== false) {
+        // Late fee query
+        return "Late fees are typically 5% of the monthly rent if paid after the 5th of the month. Please check your lease for specific details.";
+    }
+    else if (strpos($message, 'method') !== false || strpos($message, 'accept') !== false) {
+        // Payment methods query
+        return "We accept the following payment methods: credit/debit cards, bank transfers, checks, and cash payments at the office. You can make payments through the Payments section of your tenant portal.";
+    }
+    else if (strpos($message, 'balance') !== false || strpos($message, 'owe') !== false || strpos($message, 'outstanding') !== false) {
+        
+        // Balance query - would need to calculate actual balance
+        // additional database queries to determine if there's an outstanding balance
+        $dueDayWithSuffix = getOrdinalSuffix($paymentInfo['payment_due_day']);
+        return "Your monthly rent is $" . number_format($paymentInfo['monthly_rent'], 2) . 
+       ". It's due on the " . $dueDayWithSuffix . " day of each month.";
+
+    }
+    
     else {
         // General payment query
         $dueDate = date('F j, Y', strtotime($paymentInfo['next_due_date']));
+        $dueDayWithSuffix = getOrdinalSuffix($paymentInfo['payment_due_day']);
         return "Your monthly rent is $" . number_format($paymentInfo['monthly_rent'], 2) . 
-               " and is due on the " . $paymentInfo['payment_due_day'] . 
-               "th of each month. Your next payment is due on $dueDate.";
+               " and is due on the " . $dueDayWithSuffix . 
+               " of each month. Your next payment is due on $dueDate.";
+    }
+    
+}
+function getOrdinalSuffix($number) {
+    if ($number % 100 >= 11 && $number % 100 <= 13) {
+        return $number . 'th';
+    }
+    
+    switch ($number % 10) {
+        case 1: return $number . 'st';
+        case 2: return $number . 'nd';
+        case 3: return $number . 'rd';
+        default: return $number . 'th';
     }
 }
+
+
+
 /**
  * Track payment information query
  * 
@@ -614,94 +661,118 @@ function getTenantLeaseInfo($tenantId) {
  * @param int $tenantId The tenant ID
  * @return string|null Response or null if not a lease query
  */
+/**
+ * Handle lease-related queries
+ * 
+ * @param string $userMessage The user's message
+ * @param int $tenantId The tenant ID
+ * @return string|null Response or null if not a lease query
+ */
 function handleLeaseQuery($userMessage, $tenantId) {
-    $message = strtolower($userMessage);
-    
-    // Check if it's a lease-related query
-    $leaseKeywords = ['lease', 'contract', 'agreement', 'term', 'renew', 'renewal', 'move out', 'moving out'];
-    $isLeaseQuery = false;
-    
-    foreach ($leaseKeywords as $keyword) {
-        if (strpos($message, $keyword) !== false) {
-            $isLeaseQuery = true;
-            break;
-        }
-    }
-    
-    if (!$isLeaseQuery) {
-        return null;
-    }
-    
-    // Get lease information
-    $leaseInfo = getTenantLeaseInfo($tenantId);
-    
-    if (isset($leaseInfo['error'])) {
-        return "I couldn't find your lease information. " . $leaseInfo['error'];
-    }
-    
-    // Determine the specific type of lease query
-    if (strpos($message, 'end') !== false || strpos($message, 'expir') !== false || 
-        strpos($message, 'when') !== false) {
-        // Lease end date query
-        $endDate = date('F j, Y', strtotime($leaseInfo['end_date']));
-        $response = "Your lease ends on $endDate. ";
+    try {
+        $message = strtolower($userMessage);
         
-        if ($leaseInfo['is_expiring_soon']) {
-            $response .= "That's only " . $leaseInfo['days_remaining'] . " days away. ";
-            $response .= "If you're interested in renewing your lease, please contact the property manager soon.";
-        } else {
-            $response .= "You have " . $leaseInfo['days_remaining'] . " days remaining on your current lease.";
+        // Check if it's a lease-related query
+        $leaseKeywords = ['lease', 'contract', 'agreement', 'term', 'renew', 'renewal', 'move out', 'moving out', 'security deposit', 'deposit'];
+        $isLeaseQuery = false;
+        
+        foreach ($leaseKeywords as $keyword) {
+            if (strpos($message, $keyword) !== false) {
+                $isLeaseQuery = true;
+                break;
+            }
         }
         
-        return $response;
-    } 
-    else if (strpos($message, 'start') !== false || strpos($message, 'begin') !== false) {
-        // Lease start date query
-        $startDate = date('F j, Y', strtotime($leaseInfo['start_date']));
-        return "Your current lease began on $startDate.";
-    }
-    else if (strpos($message, 'renew') !== false) {
-        // Renewal query
-        $endDate = date('F j, Y', strtotime($leaseInfo['end_date']));
-        $response = "Your current lease ends on $endDate. ";
-        
-        if ($leaseInfo['is_expiring_soon']) {
-            $response .= "Since your lease is ending soon, you should contact the property manager to discuss renewal options. ";
-            $response .= "Typically, lease renewals need to be confirmed at least 30 days before the end date.";
-        } else {
-            $response .= "When you're ready to discuss renewal, please contact the property manager. ";
-            $response .= "Typically, lease renewals are discussed 60-90 days before the end date.";
+        if (!$isLeaseQuery) {
+            return null;
         }
         
-        return $response;
-    }
-    else if (strpos($message, 'move out') !== false || strpos($message, 'moving out') !== false) {
-        // Move out query
-        return "If you're planning to move out at the end of your lease, you typically need to provide written notice at least 30 days before your lease end date. " .
-               "Please check your lease agreement for the specific notice period required. " .
-               "You can submit your notice through the tenant portal or by contacting the property manager.";
-    }
-    else if (strpos($message, 'break') !== false || strpos($message, 'terminate') !== false || 
-             strpos($message, 'early') !== false) {
-        // Early termination query
-        return "Early lease termination typically involves penalties as specified in your lease agreement. " .
-               "Please review your lease or contact the property manager to discuss your specific situation. " .
-               "Generally, you may be responsible for rent until a new tenant is found, plus additional fees.";
-    }
-    else {
-        // General lease query
-        $startDate = date('F j, Y', strtotime($leaseInfo['start_date']));
-        $endDate = date('F j, Y', strtotime($leaseInfo['end_date']));
-        $address = $leaseInfo['address'];
-        if ($leaseInfo['unit_number']) {
-            $address .= ', Unit ' . $leaseInfo['unit_number'];
-        }
+        // Get lease information
+        $leaseInfo = getTenantLeaseInfo($tenantId);
         
-        return "Your current lease for $address began on $startDate and ends on $endDate. " .
-               "Your monthly rent is $" . number_format($leaseInfo['monthly_rent'], 2) . " " .
-               "and your security deposit is $" . number_format($leaseInfo['security_deposit'], 2) . ".";
+        if (isset($leaseInfo['error'])) {
+            return "I couldn't find your lease information. " . $leaseInfo['error'];
+        }
+
+        if (strpos($message, 'security deposit') !== false || 
+        (strpos($message, 'deposit') !== false && !strpos($message, 'pet deposit') !== false)) {
+        // Security deposit query
+        return "Your security deposit is $" . number_format($leaseInfo['security_deposit'], 2) . ". " .
+               "This deposit is refundable at the end of your lease, subject to deductions for damages beyond normal wear and tear, " .
+               "unpaid rent, or other charges as specified in your lease agreement. " .
+               "For more specific details about what's covered, please refer to your lease agreement.";
+    }
+        
+        // Determine the specific type of lease query
+        if ((strpos($message, 'start') !== false || strpos($message, 'begin') !== false) && 
+            (strpos($message, 'when') !== false || strpos($message, 'date') !== false)) {
+            // Lease start date query
+            $startDate = date('F j, Y', strtotime($leaseInfo['start_date']));
+            return "Your current lease began on $startDate.";
+        } 
+        else if (strpos($message, 'end') !== false || strpos($message, 'expir') !== false || 
+            (strpos($message, 'when') !== false && !strpos($message, 'start') !== false)) {
+            // Lease end date query
+            $endDate = date('F j, Y', strtotime($leaseInfo['end_date']));
+            $response = "Your lease ends on $endDate. ";
+            
+            if ($leaseInfo['is_expiring_soon']) {
+                $response .= "That's only " . $leaseInfo['days_remaining'] . " days away. ";
+                $response .= "If you're interested in renewing your lease, please contact the property manager soon.";
+            } else {
+                $response .= "You have " . $leaseInfo['days_remaining'] . " days remaining on your current lease.";
+            }
+            
+            return $response;
+        } 
+        else if (strpos($message, 'renew') !== false) {
+            // Renewal query
+            $endDate = date('F j, Y', strtotime($leaseInfo['end_date']));
+            $response = "Your current lease ends on $endDate. ";
+            
+            if ($leaseInfo['is_expiring_soon']) {
+                $response .= "Since your lease is ending soon, you should contact the property manager to discuss renewal options. ";
+                $response .= "Typically, lease renewals need to be confirmed at least 30 days before the end date.";
+            } else {
+                $response .= "When you're ready to discuss renewal, please contact the property manager. ";
+                $response .= "Typically, lease renewals are discussed 60-90 days before the end date.";
+            }
+            
+            return $response;
+        }
+        else if (strpos($message, 'move out') !== false || strpos($message, 'moving out') !== false) {
+            // Move out query
+            return "If you're planning to move out at the end of your lease, you typically need to provide written notice at least 30 days before your lease end date. " .
+                   "Please check your lease agreement for the specific notice period required. " .
+                   "You can submit your notice through the tenant portal or by contacting the property manager.";
+        }
+        else if (strpos($message, 'break') !== false || strpos($message, 'terminate') !== false || 
+                 strpos($message, 'early') !== false) {
+            // Early termination query
+            return "Early lease termination typically involves penalties as specified in your lease agreement. " .
+                   "Please review your lease or contact the property manager to discuss your specific situation. " .
+                   "Generally, you may be responsible for rent until a new tenant is found, plus additional fees.";
+        }
+        else {
+            // General lease query
+            $startDate = date('F j, Y', strtotime($leaseInfo['start_date']));
+            $endDate = date('F j, Y', strtotime($leaseInfo['end_date']));
+            $address = $leaseInfo['address'];
+            if ($leaseInfo['unit_number']) {
+                $address .= ', Unit ' . $leaseInfo['unit_number'];
+            }
+            
+            return "Your current lease for $address began on $startDate and ends on $endDate. " .
+                   "Your monthly rent is $" . number_format($leaseInfo['monthly_rent'], 2) . " " .
+                   "and your security deposit is $" . number_format($leaseInfo['security_deposit'], 2) . ".";
+        }
+    } catch (Exception $e) {
+        // Log the error
+        error_log("Error in handleLeaseQuery: " . $e->getMessage());
+        return "I'm having trouble retrieving your lease information right now. Please try again later.";
     }
 }
+
 /**
  * Track lease information query
  * 
@@ -711,14 +782,40 @@ function handleLeaseQuery($userMessage, $tenantId) {
 function trackLeaseQuery($messageId, $queryType) {
     global $pdo;
     
-    $stmt = $pdo->prepare("
-        INSERT INTO chatbot_actions (message_id, action_type, action_details, success)
-        VALUES (?, 'lease_info', ?, 1)
-    ");
-    
-    $actionDetails = json_encode(['query_type' => $queryType]);
-    $stmt->execute([$messageId, $actionDetails]);
+    try {
+        // First check if the table exists
+        $stmt = $pdo->prepare("SHOW TABLES LIKE 'chatbot_actions'");
+        $stmt->execute();
+        if ($stmt->rowCount() == 0) {
+            // Table doesn't exist, log and return
+            error_log("chatbot_actions table does not exist");
+            return;
+        }
+        
+        // Check if message_id exists in chatbot_messages
+        $stmt = $pdo->prepare("
+            SELECT COUNT(*) FROM chatbot_messages WHERE message_id = ?
+        ");
+        $stmt->execute([$messageId]);
+        if ($stmt->fetchColumn() == 0) {
+            // Message doesn't exist, log and return
+            error_log("Message ID $messageId does not exist in chatbot_messages");
+            return;
+        }
+        
+        $stmt = $pdo->prepare("
+            INSERT INTO chatbot_actions (message_id, action_type, action_details, success)
+            VALUES (?, 'lease_info', ?, 1)
+        ");
+        
+        $actionDetails = json_encode(['query_type' => $queryType]);
+        $stmt->execute([$messageId, $actionDetails]);
+    } catch (Exception $e) {
+        // Log the error but don't throw it further
+        error_log("Error in trackLeaseQuery: " . $e->getMessage());
+    }
 }
+
 /**
  * Get property information for a tenant
  * 
@@ -728,54 +825,95 @@ function trackLeaseQuery($messageId, $queryType) {
 function getPropertyInfo($tenantId) {
     global $pdo;
     
-    // Get property details for tenant's active lease
-    $stmt = $pdo->prepare("
-        SELECT 
-            p.property_id, p.property_name, p.address, p.city, p.state, p.zip_code,
-            p.property_type, p.description,
-            u.unit_number, u.bedrooms, u.bathrooms, u.square_feet
-        FROM leases l
-        JOIN properties p ON l.property_id = p.property_id
-        LEFT JOIN units u ON l.unit_id = u.unit_id
-        WHERE l.tenant_id = ? AND l.status = 'active'
-        LIMIT 1
-    ");
-    $stmt->execute([$tenantId]);
-    $property = $stmt->fetch(PDO::FETCH_ASSOC);
-    
-    if (!$property) {
-        return ['error' => 'No property information found'];
-    }
-    
-    // Get amenities (this would require an amenities table, which isn't in the schema)
-    // For now, we'll extract potential amenities from the description
-    $amenities = [];
-    $commonAmenities = ['pool', 'gym', 'fitness', 'laundry', 'parking', 'garage', 'balcony', 
-                        'patio', 'dishwasher', 'washer', 'dryer', 'ac', 'air conditioning', 
-                        'heating', 'wifi', 'internet', 'cable', 'pet friendly'];
-    
-    foreach ($commonAmenities as $amenity) {
-        if (strpos(strtolower($property['description']), $amenity) !== false) {
-            $amenities[] = $amenity;
+    try {
+        // Get property details for tenant's active lease
+        $stmt = $pdo->prepare("
+            SELECT 
+                p.property_id, p.property_name, p.address, p.city, p.state, p.zip_code,
+                p.property_type, p.description, p.bedrooms, p.bathrooms, p.square_feet,
+                u.unit_number, u.bedrooms as unit_bedrooms, u.bathrooms as unit_bathrooms, 
+                u.square_feet as unit_square_feet,
+                l.monthly_rent, l.security_deposit
+            FROM leases l
+            JOIN properties p ON l.property_id = p.property_id
+            LEFT JOIN units u ON l.unit_id = u.unit_id
+            WHERE l.tenant_id = ? AND l.status = 'active'
+            LIMIT 1
+        ");
+        $stmt->execute([$tenantId]);
+        $property = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if (!$property) {
+            return ['error' => 'No property information found'];
         }
+        
+        // Use unit-specific details if available, otherwise use property details
+        $bedrooms = $property['unit_bedrooms'] ? $property['unit_bedrooms'] : $property['bedrooms'];
+        $bathrooms = $property['unit_bathrooms'] ? $property['unit_bathrooms'] : $property['bathrooms'];
+        $squareFeet = $property['unit_square_feet'] ? $property['unit_square_feet'] : $property['square_feet'];
+        
+        // Extract amenities from the description
+        $amenities = [];
+        $description = strtolower($property['description'] ?? '');
+        
+        $commonAmenities = [
+            'pool' => ['pool', 'swimming'],
+            'gym' => ['gym', 'fitness center', 'workout', 'exercise'],
+            'laundry' => ['laundry', 'washer', 'dryer'],
+            'parking' => ['parking', 'garage', 'carport'],
+            'pet friendly' => ['pet friendly', 'pets allowed', 'dog', 'cat'],
+            'balcony' => ['balcony', 'patio', 'deck'],
+            'dishwasher' => ['dishwasher'],
+            'air conditioning' => ['ac', 'air conditioning', 'central air'],
+            'heating' => ['heating', 'heat'],
+            'wifi' => ['wifi', 'internet', 'high-speed internet'],
+            'cable' => ['cable', 'tv', 'television'],
+            'security' => ['security', 'gated', 'surveillance']
+        ];
+        
+        foreach ($commonAmenities as $amenity => $keywords) {
+            foreach ($keywords as $keyword) {
+                if (strpos($description, $keyword) !== false) {
+                    $amenities[] = $amenity;
+                    break;
+                }
+            }
+        }
+        
+        // If no amenities found in description, add some default ones based on property type
+        if (empty($amenities)) {
+            // Add basic amenities based on property type
+            if ($property['property_type'] == 'apartment' || $property['property_type'] == 'condo') {
+                $amenities = ['parking', 'laundry'];
+            } else if ($property['property_type'] == 'house') {
+                $amenities = ['parking', 'laundry', 'yard'];
+            }
+        }
+        
+        // Format the property information
+        return [
+            'property_name' => $property['property_name'],
+            'address' => $property['address'],
+            'city' => $property['city'],
+            'state' => $property['state'],
+            'zip_code' => $property['zip_code'],
+            'property_type' => $property['property_type'],
+            'unit_number' => $property['unit_number'],
+            'bedrooms' => $bedrooms,
+            'bathrooms' => $bathrooms,
+            'square_feet' => $squareFeet,
+            'monthly_rent' => $property['monthly_rent'],
+            'security_deposit' => $property['security_deposit'],
+            'description' => $property['description'],
+            'amenities' => array_unique($amenities)
+        ];
+    } catch (Exception $e) {
+        error_log("Error in getPropertyInfo: " . $e->getMessage());
+        return ['error' => 'Error retrieving property information'];
     }
-    
-    // Format the property information
-    return [
-        'property_name' => $property['property_name'],
-        'address' => $property['address'],
-        'city' => $property['city'],
-        'state' => $property['state'],
-        'zip_code' => $property['zip_code'],
-        'property_type' => $property['property_type'],
-        'unit_number' => $property['unit_number'],
-        'bedrooms' => $property['bedrooms'],
-        'bathrooms' => $property['bathrooms'],
-        'square_feet' => $property['square_feet'],
-        'description' => $property['description'],
-        'amenities' => $amenities
-    ];
 }
+
+
 /**
  * Handle property-related queries
  * 
@@ -784,116 +922,143 @@ function getPropertyInfo($tenantId) {
  * @return string|null Response or null if not a property query
  */
 function handlePropertyQuery($userMessage, $tenantId) {
-    $message = strtolower($userMessage);
-    
-    // Check if it's a property-related query
-    $propertyKeywords = ['property', 'apartment', 'house', 'building', 'amenity', 'amenities', 
-                         'facility', 'facilities', 'feature', 'features', 'gym', 'pool', 
-                         'laundry', 'parking', 'pet', 'pets', 'rule', 'rules', 'policy', 'policies'];
-    $isPropertyQuery = false;
-    
-    foreach ($propertyKeywords as $keyword) {
-        if (strpos($message, $keyword) !== false) {
-            $isPropertyQuery = true;
-            break;
-        }
-    }
-    
-    if (!$isPropertyQuery) {
-        return null;
-    }
-    
-    // Get property information
-    $propertyInfo = getPropertyInfo($tenantId);
-    
-    if (isset($propertyInfo['error'])) {
-        return "I couldn't find information about your property. " . $propertyInfo['error'];
-    }
-    
-    // Determine the specific type of property query
-    if (strpos($message, 'amenity') !== false || strpos($message, 'amenities') !== false || 
-        strpos($message, 'feature') !== false || strpos($message, 'features') !== false) {
-        // Amenities query
-        if (empty($propertyInfo['amenities'])) {
-            return "I don't have specific information about amenities for your property. Please check your lease agreement or contact the property manager for details.";
+    try {
+        $message = strtolower($userMessage);
+        
+        // Check if it's a property-related query
+        $propertyKeywords = ['property', 'apartment', 'house', 'building', 'amenity', 'amenities', 
+                             'facility', 'facilities', 'feature', 'features', 'gym', 'pool', 
+                             'laundry', 'parking', 'pet', 'pets', 'rule', 'rules', 'policy', 'policies'];
+        $isPropertyQuery = false;
+        
+        foreach ($propertyKeywords as $keyword) {
+            if (strpos($message, $keyword) !== false) {
+                $isPropertyQuery = true;
+                break;
+            }
         }
         
-        $amenitiesList = implode(', ', array_map('ucfirst', $propertyInfo['amenities']));
-        return "Your property includes the following amenities: $amenitiesList. For more details, please check your lease agreement or contact the property manager.";
-    } 
-    else if (strpos($message, 'pet') !== false || strpos($message, 'dog') !== false || 
-             strpos($message, 'cat') !== false || strpos($message, 'animal') !== false) {
-        // Pet policy query
-        if (in_array('pet friendly', $propertyInfo['amenities'])) {
-            return "Your property appears to be pet-friendly. However, there may be specific restrictions or pet deposits required. Please check your lease agreement or contact the property manager for details on the pet policy.";
-        } else {
-            return "I don't have specific information about the pet policy for your property. Please check your lease agreement or contact the property manager for details.";
-        }
-    }
-    else if (strpos($message, 'parking') !== false || strpos($message, 'garage') !== false || 
-             strpos($message, 'car') !== false) {
-        // Parking query
-        if (in_array('parking', $propertyInfo['amenities']) || in_array('garage', $propertyInfo['amenities'])) {
-            return "Your property includes parking facilities. For specific details about parking assignments, guest parking, or parking rules, please check your lease agreement or contact the property manager.";
-        } else {
-            return "I don't have specific information about parking at your property. Please check your lease agreement or contact the property manager for details.";
-        }
-    }
-    else if (strpos($message, 'laundry') !== false || strpos($message, 'washer') !== false || 
-             strpos($message, 'dryer') !== false) {
-        // Laundry query
-        if (in_array('laundry', $propertyInfo['amenities']) || 
-            in_array('washer', $propertyInfo['amenities']) || 
-            in_array('dryer', $propertyInfo['amenities'])) {
-            return "Your property includes laundry facilities. For specific details about laundry room hours or in-unit washer/dryer information, please check your lease agreement or contact the property manager.";
-        } else {
-            return "I don't have specific information about laundry facilities at your property. Please check your lease agreement or contact the property manager for details.";
-        }
-    }
-    else if (strpos($message, 'gym') !== false || strpos($message, 'fitness') !== false || 
-             strpos($message, 'exercise') !== false) {
-        // Gym/fitness query
-        if (in_array('gym', $propertyInfo['amenities']) || in_array('fitness', $propertyInfo['amenities'])) {
-            return "Your property includes fitness facilities. For specific details about gym hours, equipment, or access, please check your lease agreement or contact the property manager.";
-        } else {
-            return "I don't have information about fitness facilities at your property. Please check your lease agreement or contact the property manager for details.";
-        }
-    }
-    else if (strpos($message, 'pool') !== false || strpos($message, 'swimming') !== false) {
-        // Pool query
-        if (in_array('pool', $propertyInfo['amenities'])) {
-            return "Your property includes a swimming pool. For specific details about pool hours, rules, or seasonal availability, please check your lease agreement or contact the property manager.";
-        } else {
-            return "I don't have information about a swimming pool at your property. Please check your lease agreement or contact the property manager for details.";
-        }
-    }
-    else if (strpos($message, 'rule') !== false || strpos($message, 'policy') !== false || 
-             strpos($message, 'policies') !== false || strpos($message, 'regulation') !== false) {
-        // Rules/policies query
-        return "For specific information about property rules and policies, please refer to your lease agreement. Common rules include quiet hours, guest policies, smoking restrictions, and maintenance procedures. If you have questions about a specific rule, please contact the property manager.";
-    }
-    else {
-        // General property query
-        $response = "You're living at " . $propertyInfo['property_name'] . ", located at " . 
-                   $propertyInfo['address'] . ", " . $propertyInfo['city'] . ", " . 
-                   $propertyInfo['state'] . " " . $propertyInfo['zip_code'] . ". ";
-        
-        if ($propertyInfo['unit_number']) {
-            $response .= "Your unit number is " . $propertyInfo['unit_number'] . ". ";
+        if (!$isPropertyQuery) {
+            return null;
         }
         
-        $response .= "It's a " . $propertyInfo['property_type'] . " with " . 
-                    $propertyInfo['bedrooms'] . " bedroom(s) and " . 
-                    $propertyInfo['bathrooms'] . " bathroom(s), totaling " . 
-                    $propertyInfo['square_feet'] . " square feet. ";
+        // Get property information
+        $propertyInfo = getPropertyInfo($tenantId);
         
-        if (!empty($propertyInfo['amenities'])) {
-            $response .= "Amenities include: " . implode(', ', array_map('ucfirst', $propertyInfo['amenities'])) . ".";
+        if (isset($propertyInfo['error'])) {
+            return "I couldn't find information about your property. " . $propertyInfo['error'];
         }
         
-        return $response;
+        // Determine the specific type of property query
+        if (strpos($message, 'amenity') !== false || strpos($message, 'amenities') !== false || 
+            strpos($message, 'feature') !== false || strpos($message, 'features') !== false) {
+            // Amenities query
+            if (empty($propertyInfo['amenities'])) {
+                return "Based on your " . $propertyInfo['property_type'] . " at " . $propertyInfo['address'] . 
+                       ", standard amenities would typically include basic utilities. For specific amenities, " +
+                       "please check your lease agreement or contact the property manager.";
+            }
+            
+            $amenitiesList = implode(', ', array_map('ucfirst', $propertyInfo['amenities']));
+            return "Based on the information I have, your " . $propertyInfo['property_type'] . " at " . 
+                   $propertyInfo['address'] . " includes the following amenities: " . $amenitiesList . 
+                   ". For more details, please check your lease agreement or contact the property manager.";
+        } 
+        else if (strpos($message, 'pet') !== false || strpos($message, 'dog') !== false || 
+                 strpos($message, 'cat') !== false || strpos($message, 'animal') !== false) {
+            // Pet policy query
+            if (in_array('pet friendly', $propertyInfo['amenities'])) {
+                return "Based on the information I have, your " . $propertyInfo['property_type'] . " at " . 
+                       $propertyInfo['address'] . " appears to be pet-friendly. However, there may be specific " +
+                       "restrictions or pet deposits required. Please check your lease agreement or contact the " +
+                       "property manager for details on the pet policy.";
+            } else {
+                return "I don't have specific information about the pet policy for your " . $propertyInfo['property_type'] . 
+                       " at " . $propertyInfo['address'] . ". Please check your lease agreement or contact the property manager for details.";
+            }
+        }
+        else if (strpos($message, 'parking') !== false || strpos($message, 'garage') !== false || 
+                 strpos($message, 'car') !== false) {
+            // Parking query
+            if (in_array('parking', $propertyInfo['amenities']) || in_array('garage', $propertyInfo['amenities'])) {
+                return "Based on the information I have, your " . $propertyInfo['property_type'] . " at " . 
+                       $propertyInfo['address'] . " includes parking facilities. For specific details about " +
+                       "parking assignments, guest parking, or parking rules, please check your lease agreement " +
+                       "or contact the property manager.";
+            } else {
+                return "I don't have specific information about parking at your " . $propertyInfo['property_type'] . 
+                       " at " . $propertyInfo['address'] . ". Please check your lease agreement or contact the property manager for details.";
+            }
+        }
+        else if (strpos($message, 'laundry') !== false || strpos($message, 'washer') !== false || 
+                 strpos($message, 'dryer') !== false) {
+            // Laundry query
+            if (in_array('laundry', $propertyInfo['amenities']) || 
+                in_array('washer', $propertyInfo['amenities']) || 
+                in_array('dryer', $propertyInfo['amenities'])) {
+                return "Your property includes laundry facilities. For specific details about laundry room hours or in-unit washer/dryer information, please check your lease agreement or contact the property manager.";
+            } else {
+                return "I don't have specific information about laundry facilities at your property. Please check your lease agreement or contact the property manager for details.";
+            }
+        }
+        else if (strpos($message, 'gym') !== false || strpos($message, 'fitness') !== false || 
+                 strpos($message, 'exercise') !== false) {
+            // Gym/fitness query
+            if (in_array('gym', $propertyInfo['amenities']) || in_array('fitness', $propertyInfo['amenities'])) {
+                return "Your property includes fitness facilities. For specific details about gym hours, equipment, or access, please check your lease agreement or contact the property manager.";
+            } else {
+                return "I don't have information about fitness facilities at your property. Please check your lease agreement or contact the property manager for details.";
+            }
+        }
+        else if (strpos($message, 'pool') !== false || strpos($message, 'swimming') !== false) {
+            // Pool query
+            if (in_array('pool', $propertyInfo['amenities'])) {
+                return "Your property includes a swimming pool. For specific details about pool hours, rules, or seasonal availability, please check your lease agreement or contact the property manager.";
+            } else {
+                return "I don't have information about a swimming pool at your property. Please check your lease agreement or contact the property manager for details.";
+            }
+        }
+        else if (strpos($message, 'quiet') !== false || strpos($message, 'hour') !== false || 
+                 strpos($message, 'noise') !== false) {
+            // Quiet hours query
+            return "Most properties have quiet hours between 10:00 PM and 8:00 AM. For the specific quiet hours and noise policies at your property, please check your lease agreement or contact the property manager.";
+        }
+        else if (strpos($message, 'rule') !== false || strpos($message, 'policy') !== false || 
+                 strpos($message, 'policies') !== false || strpos($message, 'regulation') !== false) {
+            // Rules/policies query
+            return "For specific information about property rules and policies, please refer to your lease agreement. Common rules include quiet hours, guest policies, smoking restrictions, and maintenance procedures. If you have questions about a specific rule, please contact the property manager.";
+        }
+        else {
+            // General property query
+            $response = "You're living at " . $propertyInfo['property_name'] . ", located at " . 
+                       $propertyInfo['address'] . ", " . $propertyInfo['city'] . ", " . 
+                       $propertyInfo['state'] . " " . $propertyInfo['zip_code'] . ". ";
+            
+            if ($propertyInfo['unit_number']) {
+                $response .= "Your unit number is " . $propertyInfo['unit_number'] . ". ";
+            }
+            
+            $response .= "It's a " . $propertyInfo['property_type'] . " with " . 
+                        $propertyInfo['bedrooms'] . " bedroom(s) and " . 
+                        $propertyInfo['bathrooms'] . " bathroom(s), totaling " . 
+                        $propertyInfo['square_feet'] . " square feet. ";
+            
+            $response .= "Your monthly rent is $" . number_format($propertyInfo['monthly_rent'], 2) . 
+                        " with a security deposit of $" . number_format($propertyInfo['security_deposit'], 2) . ". ";
+            
+            if (!empty($propertyInfo['amenities'])) {
+                $response .= "Amenities include: " . implode(', ', array_map('ucfirst', $propertyInfo['amenities'])) . ".";
+            }
+            
+            return $response;
+        }
+    } catch (Exception $e) {
+        // Log the error
+        error_log("Error in handlePropertyQuery: " . $e->getMessage());
+        return "I'm having trouble retrieving your property information right now. Please try again later.";
     }
 }
+
 /**
  * Track property information query
  * 

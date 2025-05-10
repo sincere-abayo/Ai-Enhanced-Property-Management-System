@@ -4,7 +4,7 @@ require_once '../includes/auth.php';
 require_once '../includes/functions.php';
 
 // Require admin role
-requireRole('admin');
+requireRole('landlord');
 
 // Handle form submissions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -113,9 +113,35 @@ $recentConversations = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Page title
 $pageTitle = "Chatbot Management";
-include_once 'admin_sidebar.php';
 ?>
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Property Management System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#1a56db',
+                        secondary: '#7e3af2',
+                        success: '#0ea5e9',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50"></body>
+<?php
+include_once 'admin_sidebar.php';
+?>
+ <div class="ml-64 p-8"></div>
 <div class="container mx-auto px-4 py-8">
     <h1 class="text-3xl font-bold text-gray-800 mb-6">Chatbot Management</h1>
     
@@ -319,44 +345,60 @@ include_once 'admin_sidebar.php';
     <div class="bg-white rounded-xl p-6 max-w-2xl w-full mx-4">
         <h3 class="text-xl font-bold mb-4">Add New FAQ</h3>
         
-        <form method="POST" action="">
-            <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Question</label>
-                <input type="text" name="question" required class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring-primary">
+        <form method="POST" action="" class="space-y-6">
+            <div>
+            <label for="question" class="block text-sm font-medium text-gray-700 mb-2">Question</label>
+            <input type="text" id="question" name="question" required 
+                class="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary focus:ring-primary transition-colors p-3"
+                placeholder="Enter the frequently asked question">
+            <p class="mt-2 text-sm text-gray-500">Make it clear and concise, as tenants would ask it.</p>
             </div>
             
-            <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Answer</label>
-                <textarea name="answer" rows="4" required class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring-primary"></textarea>
+            <div>
+            <label for="answer" class="block text-sm font-medium text-gray-700 mb-2">Answer</label>
+            <textarea id="answer" name="answer" rows="4" required 
+                class="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary focus:ring-primary transition-colors p-3"
+                placeholder="Enter a helpful, detailed answer"></textarea>
+            <p class="mt-2 text-sm text-gray-500">Provide a complete answer with all necessary information.</p>
             </div>
             
-            <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Category</label>
-                <select name="category" required class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring-primary">
-                    <option value="general">General</option>
-                    <option value="maintenance">Maintenance</option>
-                    <option value="payments">Payments</option>
-                    <option value="lease">Lease</option>
-                    <option value="property">Property</option>
-                    <option value="amenities">Amenities</option>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <label for="category" class="block text-sm font-medium text-gray-700 mb-2">Category</label>
+                <select id="category" name="category" required 
+                class="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary focus:ring-primary transition-colors p-3">
+                <option value="" disabled selected>Select a category</option>
+                <option value="general">General</option>
+                <option value="maintenance">Maintenance</option>
+                <option value="payments">Payments</option>
+                <option value="lease">Lease</option>
+                <option value="property">Property</option>
+                <option value="amenities">Amenities</option>
                 </select>
+                <p class="mt-2 text-sm text-gray-500">Categorizing helps organize and find FAQs.</p>
             </div>
             
-            <div class="mb-6">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Keywords (comma separated)</label>
-                <input type="text" name="keywords" class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring-primary">
-                <p class="text-xs text-gray-500 mt-1">Enter keywords that will help match this FAQ to user questions</p>
+            <div>
+                <label for="keywords" class="block text-sm font-medium text-gray-700 mb-2">Keywords (comma separated)</label>
+                <input type="text" id="keywords" name="keywords" 
+                class="w-full rounded-lg border-gray-300 shadow-sm focus:border-primary focus:ring-primary transition-colors p-3"
+                placeholder="e.g., rent, payment, due date">
+                <p class="mt-2 text-sm text-gray-500">Keywords help match questions to user queries.</p>
+            </div>
             </div>
             
-            <div class="flex justify-end space-x-4">
-                <button type="button" onclick="closeAddFaqModal()" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
-                    Cancel
-                </button>
-                <button type="submit" name="add_faq" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-700">
-                    Add FAQ
-                </button>
+            <div class="flex justify-end space-x-4 pt-6 border-t border-gray-200 mt-6">
+            <button type="button" onclick="closeAddFaqModal()" 
+                class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                <i class="fas fa-times mr-2"></i>Cancel
+            </button>
+            <button type="submit" name="add_faq" 
+                class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
+                <i class="fas fa-plus mr-2"></i>Add FAQ
+            </button>
             </div>
         </form>
+
     </div>
 </div>
 
@@ -426,7 +468,7 @@ include_once 'admin_sidebar.php';
         </div>
     </div>
 </div>
-
+                    </div>
 <script>
 // Tab functionality
 document.addEventListener('DOMContentLoaded', function() {

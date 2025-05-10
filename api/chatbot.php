@@ -166,23 +166,34 @@ switch ($method) {
         $stmt->execute([$conversationId, $botResponse]);
         $messageId = $pdo->lastInsertId();
         
-        // Track topic if applicable
-        $currentTopics = extractTopics($userMessage);
-        if (!empty($currentTopics)) {
-            $topicName = $currentTopics[0];
-            
-            // Track lease query if applicable
-            if ($topicName === 'lease') {
-                $queryType = 'general';
-                if (strpos(strtolower($userMessage), 'end') !== false || 
-                    strpos(strtolower($userMessage), 'expir') !== false) {
-                    $queryType = 'end_date';
-                } elseif (strpos(strtolower($userMessage), 'renew') !== false) {
-                    $queryType = 'renewal';
-                }
-                trackLeaseQuery($messageId, $queryType);
-            }
-            
+       // Track topic if applicable
+$currentTopics = extractTopics($userMessage);
+if (!empty($currentTopics)) {
+    $topicName = $currentTopics[0];
+    
+// Track lease query if applicable
+if ($topicName === 'lease') {
+    try {
+        $queryType = 'general';
+        if (strpos(strtolower($userMessage), 'security deposit') !== false || 
+            strpos(strtolower($userMessage), 'deposit') !== false) {
+            $queryType = 'security_deposit';
+        } else if (strpos(strtolower($userMessage), 'start') !== false || 
+            strpos(strtolower($userMessage), 'begin') !== false) {
+            $queryType = 'start_date';
+        } else if (strpos(strtolower($userMessage), 'end') !== false || 
+            strpos(strtolower($userMessage), 'expir') !== false) {
+            $queryType = 'end_date';
+        } else if (strpos(strtolower($userMessage), 'renew') !== false) {
+            $queryType = 'renewal';
+        }
+        trackLeaseQuery($messageId, $queryType);
+    } catch (Exception $e) {
+        // Log the error but continue processing
+        error_log("Error tracking lease query: " . $e->getMessage());
+    }
+}
+
             // Track payment query if applicable
             if ($topicName === 'payment') {
                 $queryType = 'general';
@@ -198,19 +209,32 @@ switch ($method) {
                 trackPaymentQuery($messageId, $queryType);
             }
             
-            // Track property query if applicable
-            if ($topicName === 'property') {
-                $queryType = 'general';
-                if (strpos(strtolower($userMessage), 'amenity') !== false || 
-                    strpos(strtolower($userMessage), 'feature') !== false) {
-                    $queryType = 'amenities';
-                } elseif (strpos(strtolower($userMessage), 'pet') !== false) {
-                    $queryType = 'pet_policy';
-                } elseif (strpos(strtolower($userMessage), 'park') !== false) {
-                    $queryType = 'parking';
-                }
-                trackPropertyQuery($messageId, $queryType);
-            }
+          // Track property query if applicable
+if ($topicName === 'property') {
+    try {
+        $queryType = 'general';
+        if (strpos(strtolower($userMessage), 'amenity') !== false || 
+            strpos(strtolower($userMessage), 'feature') !== false) {
+            $queryType = 'amenities';
+        } else if (strpos(strtolower($userMessage), 'pet') !== false) {
+            $queryType = 'pet_policy';
+        } else if (strpos(strtolower($userMessage), 'park') !== false) {
+            $queryType = 'parking';
+        } else if (strpos(strtolower($userMessage), 'gym') !== false || 
+                  strpos(strtolower($userMessage), 'fitness') !== false) {
+            $queryType = 'gym';
+        } else if (strpos(strtolower($userMessage), 'pool') !== false) {
+            $queryType = 'pool';
+        } else if (strpos(strtolower($userMessage), 'laundry') !== false) {
+            $queryType = 'laundry';
+        }
+        trackPropertyQuery($messageId, $queryType);
+    } catch (Exception $e) {
+        // Log the error but continue processing
+        error_log("Error tracking property query: " . $e->getMessage());
+    }
+}
+
         }
         
         // Track escalation if applicable
