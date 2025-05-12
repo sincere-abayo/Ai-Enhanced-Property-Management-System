@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 12, 2025 at 08:29 PM
+-- Generation Time: May 12, 2025 at 08:47 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.0.30
 
@@ -46,6 +46,126 @@ INSERT INTO `ai_insights` (`insight_id`, `landlord_id`, `property_id`, `tenant_i
 (2, 2, 2, 4, 'rent_prediction', '{\"current_rent\": 3200, \"suggested_rent\": 3400, \"market_analysis\": \"Rents in this area have increased 6% in the last year\"}', '2025-04-14 13:04:41'),
 (3, 2, 3, 5, 'maintenance_prediction', '{\"prediction\": \"Water heater may need replacement within 6 months\", \"estimated_cost\": 800, \"priority\": \"medium\"}', '2025-04-14 13:04:41'),
 (4, 2, NULL, NULL, 'financial_forecast', '{\"monthly_income\": 9700, \"annual_projection\": 116400, \"expense_ratio\": 32, \"roi\": 8.5}', '2025-04-14 13:04:41');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `chatbot_actions`
+--
+
+CREATE TABLE `chatbot_actions` (
+  `action_id` int(11) NOT NULL,
+  `message_id` int(11) NOT NULL,
+  `action_type` enum('provide_info','create_maintenance','payment_info','escalate','other') NOT NULL,
+  `action_details` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`action_details`)),
+  `success` tinyint(1) NOT NULL,
+  `timestamp` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `chatbot_context`
+--
+
+CREATE TABLE `chatbot_context` (
+  `context_id` int(11) NOT NULL,
+  `conversation_id` int(11) NOT NULL,
+  `context_data` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`context_data`)),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `chatbot_conversations`
+--
+
+CREATE TABLE `chatbot_conversations` (
+  `conversation_id` int(11) NOT NULL,
+  `tenant_id` int(11) NOT NULL,
+  `start_time` timestamp NOT NULL DEFAULT current_timestamp(),
+  `end_time` timestamp NULL DEFAULT NULL,
+  `conversation_summary` text DEFAULT NULL,
+  `satisfaction_rating` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `chatbot_feedback`
+--
+
+CREATE TABLE `chatbot_feedback` (
+  `feedback_id` int(11) NOT NULL,
+  `message_id` int(11) NOT NULL,
+  `was_helpful` tinyint(1) NOT NULL,
+  `feedback_text` text DEFAULT NULL,
+  `timestamp` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `chatbot_knowledge_base`
+--
+
+CREATE TABLE `chatbot_knowledge_base` (
+  `entry_id` int(11) NOT NULL,
+  `question` text NOT NULL,
+  `answer` text NOT NULL,
+  `category` enum('general','maintenance','payments','lease','property','amenities') NOT NULL,
+  `keywords` text DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `chatbot_knowledge_base`
+--
+
+INSERT INTO `chatbot_knowledge_base` (`entry_id`, `question`, `answer`, `category`, `keywords`, `created_at`, `updated_at`) VALUES
+(1, 'When is my rent due?', 'Rent is typically due on the 1st of each month, but please check your specific lease agreement for details.', 'payments', 'rent, due date, payment, when', '2025-05-12 18:47:44', '2025-05-12 18:47:44'),
+(2, 'How do I submit a maintenance request?', 'You can submit a maintenance request through your tenant portal by clicking on \"Maintenance\" and then \"New Request\".', 'maintenance', 'fix, repair, broken, maintenance, request', '2025-05-12 18:47:44', '2025-05-12 18:47:44'),
+(3, 'How do I pay my rent?', 'You can pay your rent through the tenant portal using a credit card or bank transfer. You can also set up automatic payments.', 'payments', 'pay, rent, payment method, how to pay', '2025-05-12 18:47:44', '2025-05-12 18:47:44'),
+(4, 'When does my lease end?', 'Your lease end date is specified in your lease agreement. You can also find this information in your tenant portal under \"Lease Details\".', 'lease', 'lease end, expiration, renewal, when', '2025-05-12 18:47:44', '2025-05-12 18:47:44'),
+(5, 'What is the late fee for rent?', 'Late fees vary by property but are typically 5% of the monthly rent if paid after the 5th of the month. Please check your lease for specific details.', 'payments', 'late, fee, penalty, overdue', '2025-05-12 18:47:44', '2025-05-12 18:47:44'),
+(6, 'How do I report an emergency maintenance issue?', 'For emergency maintenance issues like water leaks, electrical problems, or no heat, please call the emergency maintenance line at [PHONE NUMBER] immediately.', 'maintenance', 'emergency, urgent, leak, fire, flood', '2025-05-12 18:47:44', '2025-05-12 18:47:44'),
+(7, 'Can I have pets in my unit?', 'Pet policies vary by property. Please check your lease agreement or contact your property manager for specific pet policies and any associated pet deposits or fees.', 'lease', 'pets, dogs, cats, animals, pet policy', '2025-05-12 18:47:44', '2025-05-12 18:47:44'),
+(8, 'How do I give notice that I`m moving out?', 'Typically, you need to provide 30-60 days written notice before moving out. Please check your lease for the specific notice period required and submit your notice through the tenant portal.', 'lease', 'moving out, vacate, leave, notice, termination', '2025-05-12 18:47:44', '2025-05-12 18:47:44');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `chatbot_messages`
+--
+
+CREATE TABLE `chatbot_messages` (
+  `message_id` int(11) NOT NULL,
+  `conversation_id` int(11) NOT NULL,
+  `timestamp` timestamp NOT NULL DEFAULT current_timestamp(),
+  `is_from_bot` tinyint(1) NOT NULL,
+  `message_text` text NOT NULL,
+  `intent_detected` varchar(100) DEFAULT NULL,
+  `confidence_score` float DEFAULT NULL,
+  `entities_detected` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`entities_detected`))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `chatbot_training_data`
+--
+
+CREATE TABLE `chatbot_training_data` (
+  `data_id` int(11) NOT NULL,
+  `input_text` text NOT NULL,
+  `expected_intent` varchar(100) NOT NULL,
+  `expected_entities` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`expected_entities`)),
+  `source` enum('manual','conversation','feedback') NOT NULL,
+  `is_verified` tinyint(1) DEFAULT 0,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -504,6 +624,53 @@ ALTER TABLE `ai_insights`
   ADD KEY `tenant_id` (`tenant_id`);
 
 --
+-- Indexes for table `chatbot_actions`
+--
+ALTER TABLE `chatbot_actions`
+  ADD PRIMARY KEY (`action_id`),
+  ADD KEY `message_id` (`message_id`);
+
+--
+-- Indexes for table `chatbot_context`
+--
+ALTER TABLE `chatbot_context`
+  ADD PRIMARY KEY (`context_id`),
+  ADD KEY `conversation_id` (`conversation_id`);
+
+--
+-- Indexes for table `chatbot_conversations`
+--
+ALTER TABLE `chatbot_conversations`
+  ADD PRIMARY KEY (`conversation_id`),
+  ADD KEY `tenant_id` (`tenant_id`);
+
+--
+-- Indexes for table `chatbot_feedback`
+--
+ALTER TABLE `chatbot_feedback`
+  ADD PRIMARY KEY (`feedback_id`),
+  ADD KEY `message_id` (`message_id`);
+
+--
+-- Indexes for table `chatbot_knowledge_base`
+--
+ALTER TABLE `chatbot_knowledge_base`
+  ADD PRIMARY KEY (`entry_id`);
+
+--
+-- Indexes for table `chatbot_messages`
+--
+ALTER TABLE `chatbot_messages`
+  ADD PRIMARY KEY (`message_id`),
+  ADD KEY `conversation_id` (`conversation_id`);
+
+--
+-- Indexes for table `chatbot_training_data`
+--
+ALTER TABLE `chatbot_training_data`
+  ADD PRIMARY KEY (`data_id`);
+
+--
 -- Indexes for table `leases`
 --
 ALTER TABLE `leases`
@@ -621,6 +788,48 @@ ALTER TABLE `ai_insights`
   MODIFY `insight_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
+-- AUTO_INCREMENT for table `chatbot_actions`
+--
+ALTER TABLE `chatbot_actions`
+  MODIFY `action_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `chatbot_context`
+--
+ALTER TABLE `chatbot_context`
+  MODIFY `context_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `chatbot_conversations`
+--
+ALTER TABLE `chatbot_conversations`
+  MODIFY `conversation_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `chatbot_feedback`
+--
+ALTER TABLE `chatbot_feedback`
+  MODIFY `feedback_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `chatbot_knowledge_base`
+--
+ALTER TABLE `chatbot_knowledge_base`
+  MODIFY `entry_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+
+--
+-- AUTO_INCREMENT for table `chatbot_messages`
+--
+ALTER TABLE `chatbot_messages`
+  MODIFY `message_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `chatbot_training_data`
+--
+ALTER TABLE `chatbot_training_data`
+  MODIFY `data_id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `leases`
 --
 ALTER TABLE `leases`
@@ -709,6 +918,36 @@ ALTER TABLE `ai_insights`
   ADD CONSTRAINT `ai_insights_ibfk_1` FOREIGN KEY (`landlord_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE,
   ADD CONSTRAINT `ai_insights_ibfk_2` FOREIGN KEY (`property_id`) REFERENCES `properties` (`property_id`) ON DELETE SET NULL,
   ADD CONSTRAINT `ai_insights_ibfk_3` FOREIGN KEY (`tenant_id`) REFERENCES `users` (`user_id`) ON DELETE SET NULL;
+
+--
+-- Constraints for table `chatbot_actions`
+--
+ALTER TABLE `chatbot_actions`
+  ADD CONSTRAINT `chatbot_actions_ibfk_1` FOREIGN KEY (`message_id`) REFERENCES `chatbot_messages` (`message_id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `chatbot_context`
+--
+ALTER TABLE `chatbot_context`
+  ADD CONSTRAINT `chatbot_context_ibfk_1` FOREIGN KEY (`conversation_id`) REFERENCES `chatbot_conversations` (`conversation_id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `chatbot_conversations`
+--
+ALTER TABLE `chatbot_conversations`
+  ADD CONSTRAINT `chatbot_conversations_ibfk_1` FOREIGN KEY (`tenant_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `chatbot_feedback`
+--
+ALTER TABLE `chatbot_feedback`
+  ADD CONSTRAINT `chatbot_feedback_ibfk_1` FOREIGN KEY (`message_id`) REFERENCES `chatbot_messages` (`message_id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `chatbot_messages`
+--
+ALTER TABLE `chatbot_messages`
+  ADD CONSTRAINT `chatbot_messages_ibfk_1` FOREIGN KEY (`conversation_id`) REFERENCES `chatbot_conversations` (`conversation_id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `leases`
