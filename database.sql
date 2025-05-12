@@ -296,6 +296,7 @@ CREATE TABLE IF NOT EXISTS chatbot_context (
     FOREIGN KEY (conversation_id) REFERENCES chatbot_conversations(conversation_id) ON DELETE CASCADE
 );
 
+-- 
 -- Initial seed data for FAQ knowledge base
 INSERT INTO chatbot_knowledge_base (question, answer, category, keywords) VALUES
 ('When is my rent due?', 'Rent is typically due on the 1st of each month, but please check your specific lease agreement for details.', 'payments', 'rent, due date, payment, when'),
@@ -306,3 +307,15 @@ INSERT INTO chatbot_knowledge_base (question, answer, category, keywords) VALUES
 ('How do I report an emergency maintenance issue?', 'For emergency maintenance issues like water leaks, electrical problems, or no heat, please call the emergency maintenance line at [PHONE NUMBER] immediately.', 'maintenance', 'emergency, urgent, leak, fire, flood'),
 ('Can I have pets in my unit?', 'Pet policies vary by property. Please check your lease agreement or contact your property manager for specific pet policies and any associated pet deposits or fees.', 'lease', 'pets, dogs, cats, animals, pet policy'),
 ('How do I give notice that I\`m moving out?', 'Typically, you need to provide 30-60 days written notice before moving out. Please check your lease for the specific notice period required and submit your notice through the tenant portal.', 'lease', 'moving out, vacate, leave, notice, termination');
+
+-- otheer neew message for logs message delivery 
+-- Message delivery logs table
+CREATE TABLE IF NOT EXISTS message_delivery_logs (
+    log_id INT AUTO_INCREMENT PRIMARY KEY,
+    message_id INT NOT NULL,
+    delivery_method ENUM('email', 'sms') NOT NULL,
+    status ENUM('sent', 'failed') NOT NULL,
+    error_message TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (message_id) REFERENCES messages(message_id) ON DELETE CASCADE
+);
