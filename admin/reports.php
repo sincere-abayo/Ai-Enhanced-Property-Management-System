@@ -267,11 +267,11 @@ function formatCurrency($amount) {
                 <h2 class="text-2xl font-bold text-gray-800">Reports & Analytics</h2>
                 <p class="text-gray-600">View financial and operational reports for your properties</p>
             </div>
-            <div>
+            <!-- <div>
                 <button onclick="window.print()" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-blue-700">
                     <i class="fas fa-print mr-2"></i>Print Reports
                 </button>
-            </div>
+            </div> -->
         </div>
 
         <!-- Date Range & Property Filter -->

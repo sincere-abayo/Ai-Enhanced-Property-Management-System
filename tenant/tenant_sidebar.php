@@ -90,3 +90,4 @@ $current_page = basename($_SERVER['PHP_SELF']);
         </div>
     </div>
 </div>
+<?php include_once '../includes/chatbot_widget.php'; ?>

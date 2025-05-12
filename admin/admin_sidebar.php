@@ -7,7 +7,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
     <div class="flex flex-col justify-between h-full">
         <div class="flex-grow">
             <div class="px-4 py-6 text-center border-b">
-                <h1 class="text-xl font-bold leading-none"><span class="text-primary">Property</span> Manager</h1>
+                <h1 class="text-xl font-bold leading-none"><span class="text-primary">Property</span> Landlord</h1>
             </div>
             <div class="p-4">
                 <ul class="space-y-1">
@@ -41,6 +41,12 @@ $current_page = basename($_SERVER['PHP_SELF']);
                             <i class="fas fa-envelope w-6"></i>Messages
                         </a>
                     </li>
+                      <!-- Add Chatbot Management Link -->
+                      <li>
+                        <a href="chatbot_management.php" class="flex items-center <?php echo ($current_page == 'chatbot_management.php') ? 'bg-primary text-white' : 'text-gray-600 hover:bg-gray-100'; ?> rounded-xl font-bold text-sm py-3 px-4">
+                            <i class="fas fa-robot w-6"></i>Chatbot
+                        </a>
+                    </li>
                     <li>
                         <a href="reports.php" class="flex items-center <?php echo ($current_page == 'reports.php') ? 'bg-primary text-white' : 'text-gray-600 hover:bg-gray-100'; ?> rounded-xl font-bold text-sm py-3 px-4">
                             <i class="fas fa-chart-bar w-6"></i>Reports
@@ -49,7 +55,6 @@ $current_page = basename($_SERVER['PHP_SELF']);
                 </ul>
             </div>
             
-            <!-- User Profile Section -->
                         <!-- User Profile Section -->
                         <div class="border-t p-4">
                 <div class="flex items-center">

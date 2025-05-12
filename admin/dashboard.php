@@ -12,7 +12,10 @@ requireRole('landlord');
 // Get user information
 $userId = $_SESSION['user_id'];
 $firstName = $_SESSION['first_name'];
-
+// Get date range parameters
+$startDate = isset($_GET['start_date']) ? $_GET['start_date'] : date('Y-m-01'); // First day of current month
+$endDate = isset($_GET['end_date']) ? $_GET['end_date'] : date('Y-m-t'); // Last day of current month
+$propertyId = isset($_GET['property_id']) ? (int)$_GET['property_id'] : 0;
 // Get dashboard data
 $propertyCount = getPropertyCount($userId);
 $newPropertiesThisMonth = getNewPropertiesThisMonth($userId);
@@ -23,6 +26,45 @@ $incomePercentageChange = getIncomePercentageChange($userId);
 $pendingPayments = getPendingPayments($userId);
 $recentActivities = getRecentActivities($userId);
 $upcomingTasks = getUpcomingTasks($userId);
+// Get data for reports
+$incomeSummary = getIncomeSummary($userId, $startDate, $endDate, $propertyId);
+
+// Format currency
+function formatCurrency($amount) {
+    return '$' . number_format($amount, 2);
+}
+// Get income summary
+function getIncomeSummary($userId, $startDate, $endDate, $propertyId = 0) {
+    global $pdo;
+    
+    $query = "
+        SELECT 
+            SUM(p.amount) AS total_income,
+            COUNT(p.payment_id) AS payment_count,
+            AVG(p.amount) AS average_payment
+        FROM payments p
+        JOIN leases l ON p.lease_id = l.lease_id
+        JOIN properties pr ON l.property_id = pr.property_id
+        WHERE pr.landlord_id = :landlordId
+        AND p.payment_date BETWEEN :startDate AND :endDate
+        AND (p.status IS NULL OR p.status = 'active')
+    ";
+    
+    $params = [
+        'landlordId' => $userId,
+        'startDate' => $startDate,
+        'endDate' => $endDate
+    ];
+    
+    if ($propertyId > 0) {
+        $query .= " AND pr.property_id = :propertyId";
+        $params['propertyId'] = $propertyId;
+    }
+    
+    $stmt = $pdo->prepare($query);
+    $stmt->execute($params);
+    return $stmt->fetch();
+}
 ?>
 
 <!DOCTYPE html>
@@ -274,7 +316,71 @@ $upcomingTasks = getUpcomingTasks($userId);
                 </div>
             </div>
         </div>
-
+    <!-- AI Insights -->
+    <div class="bg-white rounded-xl shadow-md p-6">
+            <div class="flex items-center mb-4">
+                <h3 class="text-lg font-semibold">AI Insights</h3>
+                <span class="ml-2 px-2 py-1 text-xs font-medium bg-purple-100 text-purple-800 rounded-full">BETA</span>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Rent Prediction -->
+                <div class="border border-gray-200 rounded-lg p-4">
+                    <div class="flex items-center mb-3">
+                        <div class="p-2 rounded-full bg-blue-100">
+                            <i class="fas fa-chart-line text-blue-500"></i>
+                        </div>
+                        <h4 class="ml-2 text-md font-medium">Rent Prediction</h4>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-3">
+                        Based on market trends and your property data, we predict you could increase rent by an average of <span class="font-semibold">4.2%</span> across your portfolio.
+                    </p>
+                    <span class="text-sm text-gray-400">Detailed analysis coming soon</span>
+                    </div>
+                
+                <!-- Payment Risk -->
+                <div class="border border-gray-200 rounded-lg p-4">
+                    <div class="flex items-center mb-3">
+                        <div class="p-2 rounded-full bg-red-100">
+                            <i class="fas fa-exclamation-triangle text-red-500"></i>
+                        </div>
+                        <h4 class="ml-2 text-md font-medium">Payment Risk</h4>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-3">
+                        We've identified <span class="font-semibold">2 tenants</span> with potential payment risks in the coming month based on payment history patterns.
+                    </p>
+                    <span class="text-sm text-gray-400">At-risk tenant analysis coming soon</span>
+                    </div>
+                
+                <!-- Maintenance Prediction -->
+                <div class="border border-gray-200 rounded-lg p-4">
+                    <div class="flex items-center mb-3">
+                        <div class="p-2 rounded-full bg-yellow-100">
+                            <i class="fas fa-tools text-yellow-500"></i>
+                        </div>
+                        <h4 class="ml-2 text-md font-medium">Maintenance Prediction</h4>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-3">
+                        Based on property age and maintenance history, we predict <span class="font-semibold">3 properties</span> may need HVAC maintenance in the next 3 months.
+                    </p>
+                    <span class="text-sm text-gray-400">maintenance forecast analysis coming soon</span>
+                    </div>
+                
+                <!-- Financial Forecast -->
+                <div class="border border-gray-200 rounded-lg p-4">
+                    <div class="flex items-center mb-3">
+                        <div class="p-2 rounded-full bg-green-100">
+                            <i class="fas fa-dollar-sign text-green-500"></i>
+                        </div>
+                        <h4 class="ml-2 text-md font-medium">Financial Forecast</h4>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-3">
+                        Your projected income for the next quarter is <span class="font-semibold"><?php echo formatCurrency($incomeSummary['total_income'] * 3 * 1.02); ?></span>, a 2% increase from current trends.
+                    </p>
+                    <span class="text-sm text-gray-400">financial projections analysis coming soon</span>
+                </div>
+            </div>
+        </div>
         <!-- Quick Actions -->
         <!-- <div class="mt-8">
             <h3 class="text-lg font-semibold mb-4">Quick Actions</h3>

@@ -115,11 +115,11 @@ function formatDate($date) {
                 <p class="text-gray-600">View your lease details and payment schedule</p>
             </div>
             <?php if ($activeLease): ?>
-            <div class="flex space-x-4">
+            <!-- <div class="flex space-x-4">
                 <button onclick="window.print()" class="bg-white text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 border border-gray-300">
                     <i class="fas fa-print mr-2"></i>Print Lease
                 </button>
-            </div>
+            </div> -->
             <?php endif; ?>
         </div>
 

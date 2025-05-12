@@ -217,3 +217,105 @@ CREATE TABLE IF NOT EXISTS password_resets (
     INDEX (email),
     INDEX (token)
 );
+
+
+-- chatbot related tables
+-- Chatbot conversations table
+CREATE TABLE IF NOT EXISTS chatbot_conversations (
+    conversation_id INT AUTO_INCREMENT PRIMARY KEY,
+    tenant_id INT NOT NULL,
+    start_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    end_time TIMESTAMP NULL,
+    conversation_summary TEXT NULL,
+    satisfaction_rating INT NULL,
+    FOREIGN KEY (tenant_id) REFERENCES users(user_id) ON DELETE CASCADE
+);
+
+-- Individual message exchanges
+CREATE TABLE IF NOT EXISTS chatbot_messages (
+    message_id INT AUTO_INCREMENT PRIMARY KEY,
+    conversation_id INT NOT NULL,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    is_from_bot BOOLEAN NOT NULL,
+    message_text TEXT NOT NULL,
+    intent_detected VARCHAR(100) NULL, 
+    confidence_score FLOAT NULL,
+    entities_detected JSON NULL,
+    FOREIGN KEY (conversation_id) REFERENCES chatbot_conversations(conversation_id) ON DELETE CASCADE
+);
+
+-- Actions taken by the chatbot
+CREATE TABLE IF NOT EXISTS chatbot_actions (
+    action_id INT AUTO_INCREMENT PRIMARY KEY,
+    message_id INT NOT NULL,
+    action_type ENUM('provide_info', 'create_maintenance', 'payment_info', 'escalate', 'other') NOT NULL,
+    action_details JSON NOT NULL,
+    success BOOLEAN NOT NULL,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (message_id) REFERENCES chatbot_messages(message_id) ON DELETE CASCADE
+);
+
+-- FAQ knowledge base
+CREATE TABLE IF NOT EXISTS chatbot_knowledge_base (
+    entry_id INT AUTO_INCREMENT PRIMARY KEY,
+    question TEXT NOT NULL,
+    answer TEXT NOT NULL,
+    category ENUM('general', 'maintenance', 'payments', 'lease', 'property', 'amenities') NOT NULL,
+    keywords TEXT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- Feedback on chatbot responses
+CREATE TABLE IF NOT EXISTS chatbot_feedback (
+    feedback_id INT AUTO_INCREMENT PRIMARY KEY,
+    message_id INT NOT NULL,
+    was_helpful BOOLEAN NOT NULL,
+    feedback_text TEXT NULL,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (message_id) REFERENCES chatbot_messages(message_id) ON DELETE CASCADE
+);
+
+-- Chatbot training data for continuous improvement
+CREATE TABLE IF NOT EXISTS chatbot_training_data (
+    data_id INT AUTO_INCREMENT PRIMARY KEY,
+    input_text TEXT NOT NULL,
+    expected_intent VARCHAR(100) NOT NULL,
+    expected_entities JSON NULL,
+    source ENUM('manual', 'conversation', 'feedback') NOT NULL,
+    is_verified BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Chatbot session context to maintain conversation state
+CREATE TABLE IF NOT EXISTS chatbot_context (
+    context_id INT AUTO_INCREMENT PRIMARY KEY,
+    conversation_id INT NOT NULL,
+    context_data JSON NOT NULL,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (conversation_id) REFERENCES chatbot_conversations(conversation_id) ON DELETE CASCADE
+);
+
+-- 
+-- Initial seed data for FAQ knowledge base
+INSERT INTO chatbot_knowledge_base (question, answer, category, keywords) VALUES
+('When is my rent due?', 'Rent is typically due on the 1st of each month, but please check your specific lease agreement for details.', 'payments', 'rent, due date, payment, when'),
+('How do I submit a maintenance request?', 'You can submit a maintenance request through your tenant portal by clicking on "Maintenance" and then "New Request".', 'maintenance', 'fix, repair, broken, maintenance, request'),
+('How do I pay my rent?', 'You can pay your rent through the tenant portal using a credit card or bank transfer. You can also set up automatic payments.', 'payments', 'pay, rent, payment method, how to pay'),
+('When does my lease end?', 'Your lease end date is specified in your lease agreement. You can also find this information in your tenant portal under "Lease Details".', 'lease', 'lease end, expiration, renewal, when'),
+('What is the late fee for rent?', 'Late fees vary by property but are typically 5% of the monthly rent if paid after the 5th of the month. Please check your lease for specific details.', 'payments', 'late, fee, penalty, overdue'),
+('How do I report an emergency maintenance issue?', 'For emergency maintenance issues like water leaks, electrical problems, or no heat, please call the emergency maintenance line at [PHONE NUMBER] immediately.', 'maintenance', 'emergency, urgent, leak, fire, flood'),
+('Can I have pets in my unit?', 'Pet policies vary by property. Please check your lease agreement or contact your property manager for specific pet policies and any associated pet deposits or fees.', 'lease', 'pets, dogs, cats, animals, pet policy'),
+('How do I give notice that I\`m moving out?', 'Typically, you need to provide 30-60 days written notice before moving out. Please check your lease for the specific notice period required and submit your notice through the tenant portal.', 'lease', 'moving out, vacate, leave, notice, termination');
+
+-- otheer neew message for logs message delivery 
+-- Message delivery logs table
+CREATE TABLE IF NOT EXISTS message_delivery_logs (
+    log_id INT AUTO_INCREMENT PRIMARY KEY,
+    message_id INT NOT NULL,
+    delivery_method ENUM('email', 'sms') NOT NULL,
+    status ENUM('sent', 'failed') NOT NULL,
+    error_message TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (message_id) REFERENCES messages(message_id) ON DELETE CASCADE
+);

@@ -121,10 +121,12 @@ function formatCurrency($amount) {
                 <p class="text-gray-600">Manage your rent payments and view payment history</p>
             </div>
             <div class="flex space-x-4">
-                <button onclick="window.print()" class="bg-white text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 border border-gray-300">
+                <button onclick="exportPaymentHistory()" class="bg-white text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 border border-gray-300">
                     <i class="fas fa-download mr-2"></i>Download History
                 </button>
             </div>
+
+
         </div>
 
         <!-- Payment Summary -->
@@ -297,24 +299,93 @@ function formatCurrency($amount) {
             <?php endif; ?>
         </div>
     </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 
-    <script>
-        function openModal() {
-            document.getElementById('markPaymentModal').classList.remove('hidden');
-            document.getElementById('markPaymentModal').classList.add('flex');
+<script>
+    function openModal() {
+        document.getElementById('markPaymentModal').classList.remove('hidden');
+        document.getElementById('markPaymentModal').classList.add('flex');
+    }
+    
+    function closeModal() {
+        document.getElementById('markPaymentModal').classList.add('hidden');
+        document.getElementById('markPaymentModal').classList.remove('flex');
+    }
+    
+    // Close modal when clicking outside
+    document.getElementById('markPaymentModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeModal();
+        }
+    });
+    
+    // Export payment history to PDF
+    function exportPaymentHistory() {
+        // Get the payment history table
+        const table = document.querySelector('table');
+        if (!table) {
+            alert('No payment history to export');
+            return;
         }
         
-        function closeModal() {
-            document.getElementById('markPaymentModal').classList.add('hidden');
-            document.getElementById('markPaymentModal').classList.remove('flex');
-        }
+        // Create a new jsPDF instance
+        const doc = new jspdf.jsPDF();
         
-        // Close modal when clicking outside
-        document.getElementById('markPaymentModal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeModal();
+        // Set title
+        doc.setFontSize(18);
+        doc.text('Payment History', 14, 22);
+        doc.setFontSize(11);
+        doc.text('Generated on: ' + new Date().toLocaleDateString(), 14, 30);
+        
+        // Extract table data (excluding the Actions column)
+        const tableData = [];
+        const headers = [];
+        
+        // Get headers (excluding Actions column)
+        const headerCells = table.querySelectorAll('thead th');
+        headerCells.forEach((cell, index) => {
+            if (index < headerCells.length - 1) { // Skip the Actions column
+                headers.push(cell.textContent.trim());
             }
         });
-    </script>
+        tableData.push(headers);
+        
+        // Get rows
+        const rows = table.querySelectorAll('tbody tr');
+        rows.forEach(row => {
+            const rowData = [];
+            const cells = row.querySelectorAll('td');
+            cells.forEach((cell, index) => {
+                if (index < cells.length - 1) { // Skip the Actions column
+                    // Get text content without HTML tags
+                    let content = cell.textContent.trim();
+                    rowData.push(content);
+                }
+            });
+            tableData.push(rowData);
+        });
+        
+        // Add table to PDF
+        doc.autoTable({
+            head: [tableData[0]],
+            body: tableData.slice(1),
+            startY: 40,
+            theme: 'grid',
+            styles: {
+                fontSize: 9,
+                cellPadding: 3
+            },
+            headStyles: {
+                fillColor: [26, 86, 219],
+                textColor: 255
+            }
+        });
+        
+        // Save the PDF
+        doc.save('payment_history.pdf');
+    }
+</script>
+
 </body>
 </html>
