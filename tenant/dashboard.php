@@ -13,7 +13,7 @@ $lastName = $_SESSION['last_name'];
 
 // Get tenant's active lease
 $stmt = $pdo->prepare("
-    SELECT l.*, p.property_name, p.address, p.city, p.state, p.zip_code, u.unit_number
+    SELECT l.*, p.property_name, p.address, p.city, p.state, p.zip_code, p.image_path, u.unit_number
     FROM leases l
     JOIN properties p ON l.property_id = p.property_id
     LEFT JOIN units u ON l.unit_id = u.unit_id
@@ -227,34 +227,101 @@ function formatCurrency($amount) {
                 </div>
             </div>
         <?php else: ?>
-            <!-- Property Info Card -->
-            <div class="bg-white rounded-xl shadow-md p-6 mb-8">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <h3 class="text-lg font-semibold"><?php echo htmlspecialchars($lease['property_name']); ?></h3>
-                        <p class="text-gray-600">
-                            <?php 
-                            echo htmlspecialchars(
-                                ($lease['unit_number'] ? "Unit " . $lease['unit_number'] . ", " : "") . 
-                                $lease['address'] . ", " . 
-                                $lease['city'] . ", " . 
-                                $lease['state'] . " " . 
-                                $lease['zip_code']
-                            ); 
-                            ?>
-                        </p>
+     <!-- Property Info Card -->
+<div class="bg-white rounded-xl shadow-md p-6 mb-8">
+    <div class="flex items-center justify-between">
+        <div class="flex items-center">
+            <!-- Property Image -->
+            <div class="mr-4 w-24 h-24 rounded-lg overflow-hidden bg-gray-200 flex-shrink-0">
+                <?php if (!empty($lease['image_path'])): ?>
+                    <img src="<?php echo htmlspecialchars('../' . $lease['image_path']); ?>" 
+                         alt="<?php echo htmlspecialchars($lease['property_name']); ?>"
+                         class="w-full h-full object-cover">
+                <?php else: ?>
+                    <div class="w-full h-full flex items-center justify-center bg-gray-200">
+                        <i class="fas fa-home text-gray-400 text-3xl"></i>
                     </div>
-                    <div class="text-right">
-                        <p class="text-sm text-gray-500">Lease Period</p>
-                        <p class="font-semibold">
-                            <?php 
-                            echo date('M j, Y', strtotime($lease['start_date'])) . ' - ' . 
-                                 date('M j, Y', strtotime($lease['end_date'])); 
-                            ?>
-                        </p>
-                    </div>
-                </div>
+                <?php endif; ?>
             </div>
+            
+            <!-- Property Details -->
+            <div>
+                <h3 class="text-lg font-semibold"><?php echo htmlspecialchars($lease['property_name']); ?></h3>
+                <p class="text-gray-600">
+                    <?php 
+                    echo htmlspecialchars(
+                        ($lease['unit_number'] ? "Unit " . $lease['unit_number'] . ", " : "") . 
+                        $lease['address'] . ", " . 
+                        $lease['city'] . ", " . 
+                        $lease['state'] . " " . 
+                        $lease['zip_code']
+                    ); 
+                    ?>
+                </p>
+            </div>
+        </div>
+        <div class="text-right">
+            <p class="text-sm text-gray-500">Lease Period</p>
+            <p class="font-semibold">
+                <?php 
+                echo date('M j, Y', strtotime($lease['start_date'])) . ' - ' . 
+                     date('M j, Y', strtotime($lease['end_date'])); 
+                ?>
+            </p>
+        </div>
+    </div>
+</div>
+<?php if ($lease): ?>
+    <!-- Property Gallery -->
+    <div class="bg-white rounded-xl shadow-md p-6 mb-8">
+        <h3 class="text-lg font-semibold mb-4">Property Gallery</h3>
+        
+        <?php
+        // Get all images for this property
+        $stmt = $pdo->prepare("
+            SELECT * FROM property_images 
+            WHERE property_id = ? 
+            ORDER BY is_primary DESC, upload_date DESC
+        ");
+        $stmt->execute([$lease['property_id']]);
+        $propertyImages = $stmt->fetchAll();
+        ?>
+        
+        <?php if (empty($propertyImages)): ?>
+            <p class="text-gray-500 text-center py-4">No galley images available for this property.</p>
+        <?php else: ?>
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                <?php foreach ($propertyImages as $image): ?>
+                    <div class="relative aspect-square rounded-lg overflow-hidden bg-gray-200">
+                        <img src="<?php echo htmlspecialchars('../uploads/' . $image['image_path']); ?>" 
+                             alt="<?php echo htmlspecialchars($image['caption'] ?? $lease['property_name']); ?>"
+                             class="w-full h-full object-cover hover:opacity-90 transition-opacity cursor-pointer"
+                             onclick="openImageModal('<?php echo htmlspecialchars('../uploads/' . $image['image_path']); ?>', '<?php echo htmlspecialchars($image['caption'] ?? $lease['property_name']); ?>')">
+                        <?php if ($image['caption']): ?>
+                            <div class="absolute bottom-0 left-0 right-0 bg-black bg-opacity-50 text-white p-1 text-xs">
+                                <?php echo htmlspecialchars($image['caption']); ?>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
+    </div>
+
+    <!-- Image Modal -->
+    <div id="imageModal" class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 hidden">
+        <div class="max-w-4xl w-full mx-4">
+            <div class="relative">
+                <img id="modalImage" src="" alt="" class="w-full max-h-[80vh] object-contain">
+                <p id="modalCaption" class="text-white text-center mt-2"></p>
+                <button onclick="closeImageModal()" class="absolute top-2 right-2 text-white bg-black bg-opacity-50 rounded-full w-8 h-8 flex items-center justify-center">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+<?php endif; ?>
+
 
             <!-- Payment Status -->
             <div class="bg-white rounded-xl shadow-md p-6 mb-8">
@@ -451,6 +518,33 @@ function formatCurrency($amount) {
                     });
                 });
             }
+        }
+    });
+
+    // Image modal functionality
+    function openImageModal(imageSrc, caption) {
+        document.getElementById('modalImage').src = imageSrc;
+        document.getElementById('modalCaption').textContent = caption;
+        document.getElementById('imageModal').classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+    
+    function closeImageModal() {
+        document.getElementById('imageModal').classList.add('hidden');
+        document.body.style.overflow = 'auto';
+    }
+    
+    // Close modal when clicking outside the image
+    document.getElementById('imageModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeImageModal();
+        }
+    });
+    
+    // Close modal with escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && !document.getElementById('imageModal').classList.contains('hidden')) {
+            closeImageModal();
         }
     });
 </script>

@@ -216,6 +216,9 @@ foreach ($leases as $lease) {
                         <a href="add_lease.php?property_id=<?php echo $property['property_id']; ?>" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
                             <i class="fas fa-file-contract mr-2"></i>Add Lease
                         </a>
+                        <a href="property_gallery.php?id=<?php echo $property['property_id']; ?>"  class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700">
+                            <i class="fas fa-images mr-2"></i>Gallery
+                        </a>
                         <button onclick="confirmDelete(<?php echo $property['property_id']; ?>)" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">
                             <i class="fas fa-trash-alt mr-2"></i>Delete
                         </button>

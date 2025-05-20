@@ -319,3 +319,26 @@ CREATE TABLE IF NOT EXISTS message_delivery_logs (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (message_id) REFERENCES messages(message_id) ON DELETE CASCADE
 );
+-- new tables 
+-- Property images table
+CREATE TABLE IF NOT EXISTS property_images (
+    image_id INT AUTO_INCREMENT PRIMARY KEY,
+    property_id INT NOT NULL,
+    image_path VARCHAR(255) NOT NULL,
+    is_primary BOOLEAN DEFAULT FALSE,
+    caption VARCHAR(255),
+    upload_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (property_id) REFERENCES properties(property_id) ON DELETE CASCADE
+);
+-- Inquiries table for property information requests
+CREATE TABLE IF NOT EXISTS inquiries (
+    inquiry_id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL,
+    phone VARCHAR(20),
+    message TEXT NOT NULL,
+    property_id INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    status ENUM('new', 'in_progress', 'responded', 'closed') DEFAULT 'new',
+    FOREIGN KEY (property_id) REFERENCES properties(property_id) ON DELETE SET NULL
+);
