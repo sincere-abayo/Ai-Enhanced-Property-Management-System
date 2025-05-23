@@ -1,4 +1,7 @@
 <?php
+// error  reporting
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 require_once '../includes/db_connect.php';
 require_once '../includes/auth.php';
 require_once '../includes/functions.php';
@@ -315,9 +318,15 @@ $properties = getProperties($userId, $status, $propertyType, $priceRange, $searc
                             <p class="text-gray-600 mb-4"><?php echo htmlspecialchars($property['address']); ?>, <?php echo htmlspecialchars($property['city']); ?></p>
                             <div class="flex justify-between items-center mb-4">
                                 <div>
-                                    <p class="text-sm text-gray-500">Monthly Rent</p>
-                                    <p class="text-lg font-semibold">$<?php echo number_format($property['monthly_rent'], 2); ?></p>
-                                </div>
+    <p class="text-sm text-gray-500">Monthly Rent</p>
+    <p class="text-lg font-semibold" 
+       data-currency-value="<?php echo $property['monthly_rent']; ?>" 
+       data-currency-original="USD">
+        <?php 
+        echo convertAndFormat($property['monthly_rent'], 'USD', getUserCurrency()); 
+        ?>
+    </p>
+</div>
                                 <div>
                                     <p class="text-sm text-gray-500">Tenants</p>
                                     <p class="text-lg font-semibold"><?php echo $property['tenant_count']; ?></p>

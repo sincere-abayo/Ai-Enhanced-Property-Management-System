@@ -107,10 +107,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Format currency function
-function formatCurrency($amount) {
-    return '$' . number_format($amount, 2);
-}
+
 
 // If there are errors, redirect back to payments page with error messages
 if (!empty($errors)) {

@@ -5,7 +5,6 @@ ini_set('display_errors', 1);
 require_once '../includes/db_connect.php';
 require_once '../includes/auth.php';
 require_once '../includes/functions.php';
-
 // Require landlord or admin role
 requireRole('landlord');
 
@@ -29,10 +28,7 @@ $upcomingTasks = getUpcomingTasks($userId);
 // Get data for reports
 $incomeSummary = getIncomeSummary($userId, $startDate, $endDate, $propertyId);
 
-// Format currency
-function formatCurrency($amount) {
-    return '$' . number_format($amount, 2);
-}
+
 // Get income summary
 function getIncomeSummary($userId, $startDate, $endDate, $propertyId = 0) {
     global $pdo;
@@ -101,6 +97,7 @@ function getIncomeSummary($userId, $startDate, $endDate, $propertyId = 0) {
                 <p class="text-gray-600">Here's what's happening with your properties today</p>
             </div>
             <div class="flex space-x-4">
+    
               <div>
                 <div class="relative ml-3">
                     <button id="notificationButton" class="relative p-1 text-gray-600 hover:text-gray-900 focus:outline-none">
@@ -218,13 +215,17 @@ function getIncomeSummary($userId, $startDate, $endDate, $propertyId = 0) {
                     <div class="p-3 rounded-full bg-yellow-100">
                         <i class="fas fa-money-bill-wave text-yellow-500 text-2xl"></i>
                     </div>
-                    <div class="ml-4">
-                        <h3 class="text-gray-500 text-sm">Monthly Income</h3>
-                        <p class="text-2xl font-semibold">$<?php echo number_format($monthlyIncome, 2); ?></p>
-                        <p class="text-sm <?php echo $incomePercentageChange >= 0 ? 'text-green-500' : 'text-red-500'; ?>">
-                            <?php echo $incomePercentageChange >= 0 ? '+' : ''; ?><?php echo $incomePercentageChange; ?>% vs last month
-                        </p>
-                    </div>
+                   <div class="ml-4">
+    <h3 class="text-gray-500 text-sm">Monthly Income</h3>
+  <p class="text-2xl font-semibold" 
+   data-currency-value="<?php echo $monthlyIncome; ?>" 
+   data-currency-original="USD">
+    <?php echo convertAndFormat($monthlyIncome, 'USD', getUserCurrency()); ?>
+</p>
+    <p class="text-sm <?php echo $incomePercentageChange >= 0 ? 'text-green-500' : 'text-red-500'; ?>">
+        <?php echo $incomePercentageChange >= 0 ? '+' : ''; ?><?php echo $incomePercentageChange; ?>% vs last month
+    </p>
+</div>
                 </div>
             </div>
             <div class="bg-white rounded-xl shadow-md p-6">
@@ -233,10 +234,14 @@ function getIncomeSummary($userId, $startDate, $endDate, $propertyId = 0) {
                         <i class="fas fa-exclamation-circle text-red-500 text-2xl"></i>
                     </div>
                     <div class="ml-4">
-                        <h3 class="text-gray-500 text-sm">Pending Payments</h3>
-                        <p class="text-2xl font-semibold"><?php echo $pendingPayments['total']; ?></p>
-                        <p class="text-sm text-red-500">$<?php echo number_format($pendingPayments['amount'], 2); ?> overdue</p>
-                    </div>
+    <h3 class="text-gray-500 text-sm">Pending Payments</h3>
+    <p class="text-2xl font-semibold"><?php echo $pendingPayments['total']; ?></p>
+    <p class="text-sm text-red-500" 
+   data-currency-value="<?php echo $pendingPayments['amount']; ?>" 
+   data-currency-original="USD">
+    <?php echo convertAndFormat($pendingPayments['amount'], 'USD', getUserCurrency()); ?> overdue
+</p>
+</div>
                 </div>
             </div>
         </div>
@@ -375,8 +380,14 @@ function getIncomeSummary($userId, $startDate, $endDate, $propertyId = 0) {
                         <h4 class="ml-2 text-md font-medium">Financial Forecast</h4>
                     </div>
                     <p class="text-sm text-gray-600 mb-3">
-                        Your projected income for the next quarter is <span class="font-semibold"><?php echo formatCurrency($incomeSummary['total_income'] * 3 * 1.02); ?></span>, a 2% increase from current trends.
-                    </p>
+    Your projected income for the next quarter is 
+    <span class="font-semibold" 
+      data-currency-value="<?php echo $incomeSummary['total_income'] * 3 * 1.02; ?>" 
+      data-currency-original="USD">
+    <?php echo convertAndFormat($incomeSummary['total_income'] * 3 * 1.02, 'USD', getUserCurrency()); ?>
+</span>, 
+    a 2% increase from current trends.
+</p>
                     <span class="text-sm text-gray-400">financial projections analysis coming soon</span>
                 </div>
             </div>
@@ -420,6 +431,7 @@ function getIncomeSummary($userId, $startDate, $endDate, $propertyId = 0) {
             </div>
         </div> -->
     </div>
+
     <script>
     // Toggle notification dropdown
     document.getElementById('notificationButton').addEventListener('click', function() {
@@ -508,6 +520,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+    
 </script>
 </body>
 </html>

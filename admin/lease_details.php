@@ -289,10 +289,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_payment'])) {
     }
 }
 
-// Format currency
-function formatCurrency($amount) {
-    return '$' . number_format($amount, 2);
-}
+
 ?>
 
 <!DOCTYPE html>
@@ -400,11 +397,13 @@ function formatCurrency($amount) {
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                         <div>
                             <h4 class="text-sm font-medium text-gray-500 mb-1">Monthly Rent</h4>
-                            <p class="text-gray-700"><?php echo formatCurrency($lease['monthly_rent']); ?></p>
+                            <p class="text-gray-700"  data-currency-value="<?php echo $lease['monthly_rent']; ?>" 
+       data-currency-original="USD"><?php echo formatCurrency($lease['monthly_rent']); ?></p>
                         </div>
                         <div>
                             <h4 class="text-sm font-medium text-gray-500 mb-1">Security Deposit</h4>
-                            <p class="text-gray-700"><?php echo formatCurrency($lease['security_deposit']); ?></p>
+                            <p class="text-gray-700"  data-currency-value="<?php echo $lease['monthly_rent']; ?>" 
+       data-currency-original="USD"><?php echo formatCurrency($lease['security_deposit']); ?></p>
                         </div>
                         <div>
                             <h4 class="text-sm font-medium text-gray-500 mb-1">Payment Due Day</h4>
@@ -415,11 +414,13 @@ function formatCurrency($amount) {
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                         <div>
                             <h4 class="text-sm font-medium text-gray-500 mb-1">Total Lease Value</h4>
-                            <p class="text-gray-700"><?php echo formatCurrency($totalDue); ?></p>
+                            <p class="text-gray-700"  data-currency-value="<?php echo $lease['monthly_rent']; ?>" 
+       data-currency-original="USD"><?php echo formatCurrency($totalDue); ?></p>
                         </div>
                         <div>
                             <h4 class="text-sm font-medium text-gray-500 mb-1">Total Paid</h4>
-                            <p class="text-gray-700"><?php echo formatCurrency($totalPaid); ?></p>
+                            <p class="text-gray-700"  data-currency-value="<?php echo $lease['monthly_rent']; ?>" 
+       data-currency-original="USD"><?php echo formatCurrency($totalPaid); ?></p>
                         </div>
                         <div>
                             <h4 class="text-sm font-medium text-gray-500 mb-1">Next Payment Due</h4>
@@ -548,7 +549,8 @@ function formatCurrency($amount) {
                                         <div class="text-sm text-gray-900"><?php echo date('M j, Y', strtotime($payment['payment_date'])); ?></div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm font-medium text-gray-900"><?php echo formatCurrency($payment['amount']); ?></div>
+                                        <div class="text-sm font-medium text-gray-900"  data-currency-value="<?php echo $payment['amount']; ?>" 
+       data-currency-original="USD"><?php echo formatCurrency($payment['amount']); ?></div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 

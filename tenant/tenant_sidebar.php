@@ -1,4 +1,5 @@
 <?php
+require_once '../includes/currency.php';
 // Get the current page filename
 $current_page = basename($_SERVER['PHP_SELF']);
 ?>
@@ -20,7 +21,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
                         <a href="payments.php" class="flex items-center <?php echo ($current_page == 'payments.php') ? 'bg-primary text-white' : 'text-gray-600 hover:bg-gray-100'; ?> rounded-xl font-bold text-sm py-3 px-4">
                             <i class="fas fa-money-bill-wave w-6"></i>Payments
                         </a>
-                    </li>
+                     </li>
                     <li>
                         <a href="maintenance.php" class="flex items-center <?php echo ($current_page == 'maintenance.php') ? 'bg-primary text-white' : 'text-gray-600 hover:bg-gray-100'; ?> rounded-xl font-bold text-sm py-3 px-4">
                             <i class="fas fa-tools w-6"></i>Maintenance
@@ -36,12 +37,18 @@ $current_page = basename($_SERVER['PHP_SELF']);
                             <i class="fas fa-envelope w-6"></i>Messages
                         </a>
                     </li>
-                    <!-- <li>
+                    <li class="hidden">
                         <a href="documents.php" class="flex items-center <?php echo ($current_page == 'documents.php') ? 'bg-primary text-white' : 'text-gray-600 hover:bg-gray-100'; ?> rounded-xl font-bold text-sm py-3 px-4">
                             <i class="fas fa-file-alt w-6"></i>Documents
                         </a>
-                    </li> -->
+                    </li>
                 </ul>
+                                    <div class="mt-auto p-4 border-t border-gray-700">
+    <div class="flex items-center justify-between">
+        <span class="text-gray-400 text-sm">Currency</span>
+        <?php include '../includes/currency_switcher.php'; ?>
+    </div>
+</div>
             </div>
             
             <!-- User Profile Section -->
@@ -75,6 +82,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
                             ?>
                         </p>
                     </div>
+
                 </div>
                 
                 <!-- Profile and Logout Buttons -->
@@ -91,3 +99,16 @@ $current_page = basename($_SERVER['PHP_SELF']);
     </div>
 </div>
 <?php include_once '../includes/chatbot_widget.php'; ?>
+<script src="../js/currency.js"></script>
+<script>
+    // Initialize currency display when the page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        const currentCurrency = '<?php echo getUserCurrency(); ?>';
+        updatePageCurrencies(currentCurrency);
+        
+        // Listen for currency change events
+        document.addEventListener('currencyChanged', function(e) {
+            updatePageCurrencies(e.detail.currency);
+        });
+    });
+</script>

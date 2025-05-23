@@ -1,4 +1,6 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 require_once '../includes/db_connect.php';
 require_once '../includes/auth.php';
 require_once '../includes/functions.php';
@@ -93,10 +95,7 @@ $stmt = $pdo->prepare("
 $stmt->execute([$userId]);
 $unreadNotificationsCount = $stmt->fetch()['count'];
 
-// Format currency function
-function formatCurrency($amount) {
-    return '$' . number_format($amount, 2);
-}
+
 ?>
 
 <!DOCTYPE html>
@@ -329,7 +328,7 @@ function formatCurrency($amount) {
                 <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                     <div>
                         <p class="text-sm text-gray-500">Next Payment Due</p>
-                        <p class="text-xl font-semibold"><?php echo formatCurrency($nextPayment['amount']); ?></p>
+                        <p class="text-xl font-semibold" data-currency-value="<?= $nextPayment['amount'] ?>" data-currency-original="USD"><?php echo convertAndFormat($nextPayment['amount']); ?></p>
                         <p class="text-sm <?php echo $daysUntilDue <= 5 ? 'text-red-500' : 'text-gray-500'; ?>">
                             Due <?php echo $daysUntilDue > 0 ? "in $daysUntilDue days" : "today"; ?>
                             (<?php echo $nextPayment['formatted_date']; ?>)
@@ -433,7 +432,7 @@ function formatCurrency($amount) {
                             </div>
                             <div class="ml-4">
                                 <p class="text-sm font-medium">
-                                    Payment of <?php echo formatCurrency($payment['amount']); ?> recorded
+                                    Payment of <span data-currency-value="<?= $payment['amount'] ?>" data-currency-original="USD"> <?php echo formatCurrency($payment['amount']); ?> </span> recorded
                                 </p>
                                 <p class="text-xs text-gray-500">
                                     <?php echo date('F j, Y', strtotime($payment['payment_date'])); ?>

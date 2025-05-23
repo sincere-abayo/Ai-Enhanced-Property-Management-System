@@ -1,4 +1,5 @@
 <?php
+
 require_once '../includes/db_connect.php';
 require_once '../includes/auth.php';
 require_once '../includes/functions.php';
@@ -111,10 +112,6 @@ foreach ($payments as $payment) {
     $totalAmount += $payment['amount'];
 }
 
-// Format currency
-function formatCurrency($amount) {
-    return '$' . number_format($amount, 2);
-}
 ?>
 
 <!DOCTYPE html>
@@ -238,7 +235,7 @@ function formatCurrency($amount) {
                 </div>
                 <div>
                     <h3 class="text-sm font-medium text-gray-500">Total Amount</h3>
-                    <p class="text-2xl font-semibold text-green-600"><?php echo formatCurrency($totalAmount); ?></p>
+                    <p class="text-2xl font-semibold text-green-600" data-currency-value="<?php echo $totalAmount; ?>" data-currency-original="USD"><?php echo formatCurrency($totalAmount); ?></p>
                 </div>
                 <div>
                     <h3 class="text-sm font-medium text-gray-500">Date Range</h3>
@@ -300,11 +297,18 @@ function formatCurrency($amount) {
                             <?php echo htmlspecialchars($payment['first_name'] . ' ' . $payment['last_name']); ?>
                         </a>
                     </td>
+                    
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium <?php echo (isset($payment['status']) && $payment['status'] === 'voided') ? 'text-gray-500' : 'text-gray-900'; ?>">
                         <?php if (isset($payment['status']) && $payment['status'] === 'voided'): ?>
-                            <span class="line-through"><?php echo formatCurrency($payment['amount']); ?></span>
+                             <span class="line-through" data-currency-value="<?php echo $payment['amount']; ?>" 
+          data-currency-original="USD">
+        <?php echo convertAndFormat($payment['amount'], 'USD', getUserCurrency()); ?>
+    </span>
                         <?php else: ?>
-                            <?php echo formatCurrency($payment['amount']); ?>
+                            <span data-currency-value="<?php echo $payment['amount']; ?>" 
+          data-currency-original="USD">
+        <?php echo convertAndFormat($payment['amount'], 'USD', getUserCurrency()); ?>
+    </span>
                         <?php endif; ?>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm <?php echo (isset($payment['status']) && $payment['status'] === 'voided') ? 'text-gray-500' : 'text-gray-500'; ?>">

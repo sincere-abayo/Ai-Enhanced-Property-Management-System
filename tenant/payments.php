@@ -80,10 +80,7 @@ foreach ($payments as $payment) {
 
 $paymentHistoryMonths = count($paymentMonths);
 
-// Format currency function
-function formatCurrency($amount) {
-    return '$' . number_format($amount, 2);
-}
+
 ?>
 
 <!DOCTYPE html>
@@ -139,7 +136,7 @@ function formatCurrency($amount) {
                     <div class="ml-4">
                         <h3 class="text-gray-500 text-sm">Next Payment</h3>
                         <?php if ($lease): ?>
-                            <p class="text-2xl font-semibold"><?php echo formatCurrency($nextPayment['amount']); ?></p>
+                            <p class="text-2xl font-semibold" data-currency-value="<?= $nextPayment['amount'] ?>" data-currency-original="USD"><?php echo formatCurrency($nextPayment['amount']); ?></p>
                             <p class="text-sm <?php echo $daysUntilDue <= 5 ? 'text-red-500' : 'text-green-500'; ?>">
                                 Due in <?php echo $daysUntilDue; ?> days
                             </p>
@@ -173,7 +170,7 @@ function formatCurrency($amount) {
                     </div>
                     <div class="ml-4">
                         <h3 class="text-gray-500 text-sm">Total Paid</h3>
-                        <p class="text-2xl font-semibold"><?php echo formatCurrency($totalPaid); ?></p>
+                        <p class="text-2xl font-semibold" data-currency-value="<?= $totalPaid ?>" data-currency-original="USD"><?php echo formatCurrency($totalPaid); ?></p>
                         <p class="text-sm text-green-500">Last 12 months</p>
                     </div>
                 </div>
@@ -187,7 +184,7 @@ function formatCurrency($amount) {
             <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                 <div>
                     <p class="text-sm text-gray-500">Current Balance Due</p>
-                    <p class="text-xl font-semibold"><?php echo formatCurrency($nextPayment['amount']); ?></p>
+                    <p class="text-xl font-semibold" data-currency-value="<?= $nextPayment['amount'] ?>" data-currency-original="USD"><?php echo formatCurrency($nextPayment['amount']); ?></p>
                     <p class="text-sm text-gray-500">Due Date: <?php echo $nextPayment['formatted_date']; ?></p>
                 </div>
                 <div>
@@ -229,7 +226,7 @@ function formatCurrency($amount) {
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Amount</label>
-                        <input type="number" name="amount" step="0.01" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" value="<?php echo $lease ? $lease['monthly_rent'] : '0.00'; ?>">
+                        <input type="number" name="amount" step="0.01" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary " value="<?php echo $lease ? $lease['monthly_rent'] : '0.00'; ?>">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Reference Number (Optional)</label>
@@ -276,7 +273,7 @@ function formatCurrency($amount) {
                                         <div class="text-sm font-medium"><?php echo date('M j, Y', strtotime($payment['payment_date'])); ?></div>
                                     </td>
                                     <td class="px-4 py-3">
-                                        <div class="text-sm font-medium"><?php echo formatCurrency($payment['amount']); ?></div>
+                                        <div class="text-sm font-medium" data-currency-value="<?= $payment['amount'] ?>" data-currency-original="USD"><?php echo formatCurrency($payment['amount']); ?></div>
                                     </td>
                                     <td class="px-4 py-3">
                                         <div class="text-sm"><?php echo ucfirst(str_replace('_', ' ', $payment['payment_method'])); ?></div>

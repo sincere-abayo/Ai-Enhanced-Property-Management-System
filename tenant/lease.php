@@ -69,10 +69,7 @@ if ($activeLease) {
     $monthsRemaining = floor($daysRemaining / 30);
 }
 
-// Format currency function
-function formatCurrency($amount) {
-    return '$' . number_format($amount, 2);
-}
+
 
 // Format date function
 function formatDate($date) {
@@ -160,7 +157,7 @@ function formatDate($date) {
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                     <div class="bg-gray-50 p-4 rounded-lg">
                         <p class="text-sm text-gray-500">Monthly Rent</p>
-                        <p class="text-xl font-semibold"><?php echo formatCurrency($activeLease['monthly_rent']); ?></p>
+                        <p class="text-xl font-semibold" data-currency-value="<?= $activeLease['monthly_rent'] ?>" data-currency-original="USD"><?php echo formatCurrency($activeLease['monthly_rent']); ?></p>
                         <p class="text-sm text-gray-500">Due on the <?php echo $activeLease['payment_due_day']; ?><sup>th</sup> of each month</p>
                     </div>
                     <div class="bg-gray-50 p-4 rounded-lg">
@@ -170,7 +167,7 @@ function formatDate($date) {
                     </div>
                     <div class="bg-gray-50 p-4 rounded-lg">
                         <p class="text-sm text-gray-500">Security Deposit</p>
-                        <p class="text-xl font-semibold"><?php echo formatCurrency($activeLease['security_deposit']); ?></p>
+                        <p class="text-xl font-semibold" data-currency-value="<?= $activeLease['security_deposit'] ?>" data-currency-original="USD"><?php echo formatCurrency($activeLease['security_deposit']); ?></p>
                         <p class="text-sm text-gray-500">Refundable upon move-out</p>
                     </div>
                 </div>
@@ -187,7 +184,7 @@ function formatDate($date) {
                         </div>
                         <div>
                             <p class="text-sm text-gray-500">Amount Due</p>
-                            <p class="text-xl font-semibold"><?php echo formatCurrency($activeLease['monthly_rent']); ?></p>
+                            <p class="text-xl font-semibold" data-currency-value="<?= $activeLease['monthly_rent'] ?>" data-currency-original="USD"><?php echo formatCurrency($activeLease['monthly_rent']); ?></p>
                         </div>
                         <div>
                             <a href="payments.php" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-blue-700">
@@ -254,7 +251,7 @@ function formatDate($date) {
                                         <div class="text-sm font-medium"><?php echo formatDate($payment['payment_date']); ?></div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm font-medium"><?php echo formatCurrency($payment['amount']); ?></div>
+                                        <div class="text-sm font-medium" data-currency-value="<?= $payment['amount'] ?>" data-currency-original="USD"><?php echo formatCurrency($payment['amount']); ?></div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="text-sm"><?php echo ucfirst(str_replace('_', ' ', $payment['payment_method'])); ?></div>
@@ -286,7 +283,7 @@ function formatDate($date) {
                             <ul class="list-disc pl-5 space-y-2 text-sm text-gray-600">
                                 <li>Rent is due on the <?php echo $activeLease['payment_due_day']; ?><sup>th</sup> day of each month</li>
                                 <li>Late fees may apply for payments received after the due date</li>
-                                <li>Security deposit of <?php echo formatCurrency($activeLease['security_deposit']); ?> is refundable upon move-out, subject to inspection</li>
+                                <li>Security deposit of <span data-currency-value="<?= $activeLease['security_deposit'] ?>" data-currency-original="USD"><?php echo formatCurrency($activeLease['security_deposit']); ?> </span>is refundable upon move-out, subject to inspection</li>
                                 <li>Tenant is responsible for utilities as specified in the lease agreement</li>
                                 <li>Maintenance requests should be submitted through the tenant portal</li>
                                 <li>Lease renewal must be requested at least 30 days before the end date</li>
@@ -342,7 +339,7 @@ function formatDate($date) {
                                         <div class="text-sm text-gray-900"><?php echo formatDate($lease['start_date']); ?> - <?php echo formatDate($lease['end_date']); ?></div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm font-medium"><?php echo formatCurrency($lease['monthly_rent']); ?></div>
+                                        <div class="text-sm font-medium" data-currency-value="<?= $lease['monthly_rent'] ?>" data-currency-original="USD"><?php echo formatCurrency($lease['monthly_rent']); ?></div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <?php if ($lease['status'] == 'active'): ?>

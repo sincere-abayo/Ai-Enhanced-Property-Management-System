@@ -230,13 +230,21 @@ foreach ($leases as $lease) {
             <div class="bg-white rounded-xl shadow-md p-6">
                 <h3 class="text-lg font-semibold mb-4">Financial Overview</h3>
                 <div class="space-y-4">
-                    <div>
+                     <div>
                         <p class="text-gray-500 text-sm">Monthly Rent</p>
-                        <p class="text-2xl font-semibold">$<?php echo number_format($property['monthly_rent'], 2); ?></p>
+                        <p class="text-2xl font-semibold" 
+                           data-currency-value="<?php echo $property['monthly_rent']; ?>" 
+                           data-currency-original="USD">
+                            <?php echo convertAndFormat($property['monthly_rent'], 'USD', getUserCurrency()); ?>
+                        </p>
                     </div>
                     <div>
                         <p class="text-gray-500 text-sm">Current Income</p>
-                        <p class="text-2xl font-semibold">$<?php echo number_format($monthlyIncome, 2); ?></p>
+                        <p class="text-2xl font-semibold" 
+                           data-currency-value="<?php echo $monthlyIncome; ?>" 
+                           data-currency-original="USD">
+                            <?php echo convertAndFormat($monthlyIncome, 'USD', getUserCurrency()); ?>
+                        </p>
                     </div>
                     <div>
                         <p class="text-gray-500 text-sm">Occupancy Rate</p>
@@ -324,7 +332,7 @@ foreach ($leases as $lease) {
                                             </div>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
-                                            <div class="text-sm text-gray-900">$<?php echo number_format($lease['monthly_rent'], 2); ?></div>
+                                            <div class="text-sm text-gray-900 " data-currency-value="<?php echo $lease['monthly_rent'];?>" data-currency-original="USD">$<?php echo number_format($lease['monthly_rent'], 2); ?></div>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <?php if ($lease['status'] === 'active'): ?>
@@ -482,7 +490,7 @@ foreach ($leases as $lease) {
                                             <div class="text-sm text-gray-900"><?php echo date('M d, Y', strtotime($payment['payment_date'])); ?></div>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
-                                            <div class="text-sm text-gray-900">$<?php echo number_format($payment['amount'], 2); ?></div>
+                                            <div class="text-sm text-gray-900" data-currency-value="<?php echo number_format($payment['amount'], 2); ?>" data-currency-original="USD"> >$<?php echo number_format($payment['amount'], 2); ?></div>
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800 capitalize">

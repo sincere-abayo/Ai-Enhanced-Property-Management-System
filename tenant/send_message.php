@@ -2,6 +2,7 @@
 require_once '../includes/db_connect.php';
 require_once '../includes/auth.php';
 require_once '../includes/functions.php';
+require_once '../includes/messaging.php'; // Add this line for messaging functions
 
 // Require tenant role
 requireRole('tenant');
@@ -11,6 +12,7 @@ $userId = $_SESSION['user_id'];
 
 // Initialize errors array
 $errors = [];
+$messagingErrors = [];
 
 // Process form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -18,6 +20,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $recipientId = isset($_POST['recipient_id']) ? (int)$_POST['recipient_id'] : 0;
     $subject = isset($_POST['subject']) ? trim($_POST['subject']) : '';
     $message = isset($_POST['message']) ? trim($_POST['message']) : '';
+    $messageType = isset($_POST['message_type']) ? $_POST['message_type'] : 'portal';
     
     // Validate required fields
     if (empty($recipientId)) {
@@ -46,63 +49,77 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors[] = "Invalid recipient selected";
     }
     
-    // If no errors, create the message thread and send the message
+    // Get recipient contact information if needed
+    if ($messageType !== 'portal') {
+        $stmt = $pdo->prepare("
+            SELECT email, phone FROM users WHERE user_id = ?
+        ");
+               $stmt->execute([$recipientId]);
+        $recipient = $stmt->fetch();
+        
+        // Validate contact information based on message type
+        if (($messageType === 'email' || $messageType === 'both') && empty($recipient['email'])) {
+            $errors[] = "Recipient does not have an email address";
+        }
+        
+        if (($messageType === 'sms' || $messageType === 'both') && empty($recipient['phone'])) {
+            $errors[] = "Recipient does not have a phone number";
+        }
+    }
+    
+    // Process if no errors
     if (empty($errors)) {
         try {
             // Start transaction
             $pdo->beginTransaction();
             
-            // Check if a thread already exists between these users with this subject
+            // Check if there's an existing thread between these users
             $stmt = $pdo->prepare("
-                SELECT mt.thread_id
-                FROM message_threads mt
-                JOIN thread_participants tp1 ON mt.thread_id = tp1.thread_id
-                JOIN thread_participants tp2 ON mt.thread_id = tp2.thread_id
-                WHERE tp1.user_id = ? AND tp2.user_id = ? AND mt.subject = ?
+                SELECT t.thread_id 
+                FROM message_threads t
+                JOIN thread_participants p1 ON t.thread_id = p1.thread_id
+                JOIN thread_participants p2 ON t.thread_id = p2.thread_id
+                WHERE p1.user_id = ? AND p2.user_id = ?
+                ORDER BY t.updated_at DESC
                 LIMIT 1
             ");
-            $stmt->execute([$userId, $recipientId, $subject]);
+            
+            $stmt->execute([$userId, $recipientId]);
             $existingThread = $stmt->fetch();
+            
+            $threadId = null;
             
             if ($existingThread) {
                 // Use existing thread
                 $threadId = $existingThread['thread_id'];
                 
-                // Update thread timestamp
+                // Update thread subject and timestamp
                 $stmt = $pdo->prepare("
-                    UPDATE message_threads
-                    SET updated_at = NOW()
-                    WHERE thread_id = ?
+                    UPDATE message_threads 
+                    SET subject = :subject, updated_at = NOW() 
+                    WHERE thread_id = :threadId
                 ");
-                $stmt->execute([$threadId]);
                 
-                // Mark as unread for recipient
-                $stmt = $pdo->prepare("
-                    UPDATE thread_participants
-                    SET is_read = 0
-                    WHERE thread_id = ? AND user_id = ?
-                ");
-                $stmt->execute([$threadId, $recipientId]);
+                $stmt->execute([
+                    'subject' => $subject,
+                    'threadId' => $threadId
+                ]);
             } else {
-                // Create new message thread
+                // Create new thread
                 $stmt = $pdo->prepare("
-                    INSERT INTO message_threads (
-                        subject, created_at, updated_at
-                    ) VALUES (
-                        :subject, NOW(), NOW()
-                    )
+                    INSERT INTO message_threads (subject, created_at, updated_at)
+                    VALUES (:subject, NOW(), NOW())
                 ");
+                
                 $stmt->execute(['subject' => $subject]);
                 $threadId = $pdo->lastInsertId();
                 
-                // Add participants to thread
+                // Add participants
                 $stmt = $pdo->prepare("
-                    INSERT INTO thread_participants (
-                        thread_id, user_id, is_read
-                    ) VALUES 
-                    (:threadId, :userId, 1),
-                    (:threadId, :recipientId, 0)
+                    INSERT INTO thread_participants (thread_id, user_id, is_read)
+                    VALUES (:threadId, :userId, 1), (:threadId, :recipientId, 0)
                 ");
+                
                 $stmt->execute([
                     'threadId' => $threadId,
                     'userId' => $userId,
@@ -115,18 +132,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 INSERT INTO messages (
                     thread_id, sender_id, recipient_id, subject, message, message_type, created_at
                 ) VALUES (
-                    :threadId, :senderId, :recipientId, :subject, :message, 'portal', NOW()
+                    :threadId, :senderId, :recipientId, :subject, :message, :messageType, NOW()
                 )
             ");
+            
             $stmt->execute([
                 'threadId' => $threadId,
                 'senderId' => $userId,
                 'recipientId' => $recipientId,
                 'subject' => $subject,
-                'message' => $message
+                'message' => $message,
+                'messageType' => $messageType
             ]);
             
-            // Create notification for recipient
+            $messageId = $pdo->lastInsertId();
+            
+            // Mark thread as unread for recipient
+            $stmt = $pdo->prepare("
+                UPDATE thread_participants
+                SET is_read = 0
+                WHERE thread_id = :threadId AND user_id = :recipientId
+            ");
+            
+            $stmt->execute([
+                'threadId' => $threadId,
+                'recipientId' => $recipientId
+            ]);
+            
+            // Create a notification for the recipient
             $stmt = $pdo->prepare("
                 INSERT INTO notifications (
                     user_id, title, message, type, is_read, created_at
@@ -137,18 +170,102 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             $stmt->execute([
                 'userId' => $recipientId,
-                'title' => 'New message from tenant',
-                'message' => 'You have received a new message: ' . $subject
+                'title' => 'New message',
+                'message' => 'You have received a new message from ' . $_SESSION['first_name'] . ' ' . $_SESSION['last_name'] . ': ' . $subject
             ]);
+            
+            // Send via email if selected
+            if ($messageType === 'email' || $messageType === 'both') {
+                // Get sender information for the email template
+                $stmt = $pdo->prepare("
+                    SELECT first_name, last_name, role FROM users WHERE user_id = :userId
+                ");
+                $stmt->execute(['userId' => $userId]);
+                $sender = $stmt->fetch();
+                
+                // Generate email content
+                $emailBody = getEmailTemplate(
+                    $subject,
+                    $message,
+                    $sender
+                );
+                
+                // Send email
+                $emailSent = sendEmail(
+                    $recipient['email'],
+                    $subject,
+                    $emailBody,
+                    strip_tags($message)
+                );
+                
+                if (!$emailSent) {
+                    $messagingErrors[] = "Failed to send email to " . $recipient['email'];
+                }
+                
+                // Log email delivery attempt
+                $stmt = $pdo->prepare("
+                    INSERT INTO message_delivery_logs (
+                        message_id, delivery_method, status, error_message, created_at
+                    ) VALUES (
+                        :messageId, 'email', :status, :errorMessage, NOW()
+                    )
+                ");
+                
+                $stmt->execute([
+                    'messageId' => $messageId,
+                    'status' => $emailSent ? 'sent' : 'failed',
+                    'errorMessage' => $emailSent ? null : 'Failed to send email'
+                ]);
+            }
+            
+            // Send via SMS if selected
+            if ($messageType === 'sms' || $messageType === 'both') {
+                // Prepare SMS message (shortened version of the message)
+                $smsText = "New message from " . $_SESSION['first_name'] . " " . $_SESSION['last_name'] . ": ";
+                $remainingChars = 160 - strlen($smsText) - 30; // 30 chars for "... Reply in your landlord portal."
+                
+                $smsContent = strlen($message) > $remainingChars 
+                    ? substr($message, 0, $remainingChars) . "..." 
+                    : $message;
+                
+                $smsText .= $smsContent . " Reply in your landlord portal.";
+                
+                // Send SMS
+                $smsSent = sendSMS($recipient['phone'], $smsText);
+                
+                if (!$smsSent) {
+                    $messagingErrors[] = "Failed to send SMS to " . $recipient['phone'];
+                }
+                
+                // Log SMS delivery attempt
+                $stmt = $pdo->prepare("
+                    INSERT INTO message_delivery_logs (
+                        message_id, delivery_method, status, error_message, created_at
+                    ) VALUES (
+                        :messageId, 'sms', :status, :errorMessage, NOW()
+                    )
+                ");
+                
+                $stmt->execute([
+                    'messageId' => $messageId,
+                    'status' => $smsSent ? 'sent' : 'failed',
+                    'errorMessage' => $smsSent ? null : 'Failed to send SMS'
+                ]);
+            }
             
             // Commit transaction
             $pdo->commit();
             
             // Set success message
-            $_SESSION['success'] = "Your message has been sent successfully!";
+            $_SESSION['success'] = "Message sent successfully!";
             
-            // Redirect to messages page
-            header("Location: messages.php");
+            // Add warnings if any
+            if (!empty($messagingErrors)) {
+                $_SESSION['warnings'] = $messagingErrors;
+            }
+            
+            // Redirect to message thread
+            header("Location: message_thread.php?id=" . $threadId);
             exit;
             
         } catch (PDOException $e) {
@@ -159,16 +276,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// If there are errors, redirect back to messages page with error messages
-if (!empty($errors)) {
-    $_SESSION['error'] = implode("<br>", $errors);
-    header("Location: messages.php");
-    exit;
-}
-
-// If not a POST request, redirect to messages page
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header("Location: messages.php");
-    exit;
-}
+// If we get here, there were errors
+$_SESSION['errors'] = $errors;
+header("Location: messages.php");
+exit;
 ?>

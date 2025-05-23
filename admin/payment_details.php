@@ -57,10 +57,7 @@ if (!$payment) {
     exit;
 }
 
-// Format currency
-function formatCurrency($amount) {
-    return '$' . number_format($amount, 2);
-}
+
 
 // Format payment status based on due date and payment date
 function getPaymentStatus($paymentDate, $dueDate) {
@@ -183,7 +180,7 @@ $paymentStatus = getPaymentStatus($payment['payment_date'], $dueDate);
                            <!-- Add a "VOIDED" watermark to the payment amount -->
 <div class="relative">
     <h4 class="text-sm font-medium text-gray-500">Amount</h4>
-    <p class="text-2xl font-bold text-gray-900"><?php echo formatCurrency($payment['amount']); ?></p>
+    <p class="text-2xl font-bold text-gray-900" data-currency-value="<?php echo $payment['amount']; ?>" data-currency-original="USD"><?php echo formatCurrency($payment['amount']); ?></p>
     <?php if (isset($payment['status']) && $payment['status'] === 'voided'): ?>
         <div class="absolute inset-0 flex items-center justify-center">
             <span class="text-3xl font-bold text-red-500 opacity-30 transform -rotate-45">VOIDED</span>
@@ -292,7 +289,7 @@ $paymentStatus = getPaymentStatus($payment['payment_date'], $dueDate);
                             </div>
                             <div>
                                 <h4 class="text-sm font-medium text-gray-500">Monthly Rent</h4>
-                                <p class="text-gray-900"><?php echo formatCurrency($payment['monthly_rent']); ?></p>
+                                <p class="text-gray-900" data-currency-value="<?php echo $payment['monthly_rent']; ?>" data-currency-original="USD"><?php echo formatCurrency($payment['monthly_rent']); ?></p>
                             </div>
                         </div>
                         <div class="mt-4">

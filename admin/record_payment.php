@@ -1,4 +1,6 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 require_once '../includes/db_connect.php';
 require_once '../includes/auth.php';
 require_once '../includes/functions.php';
@@ -156,10 +158,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['record_payment'])) {
     }
 }
 
-// Format currency
-function formatCurrency($amount) {
-    return '$' . number_format($amount, 2);
-}
+
 ?>
 
 <!DOCTYPE html>

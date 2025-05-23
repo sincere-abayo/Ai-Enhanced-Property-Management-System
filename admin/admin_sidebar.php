@@ -1,4 +1,6 @@
 <?php
+require_once '../includes/currency.php';
+
 // Get the current page filename
 $current_page = basename($_SERVER['PHP_SELF']);
 ?>
@@ -53,6 +55,12 @@ $current_page = basename($_SERVER['PHP_SELF']);
                         </a>
                     </li>
                 </ul>
+                <div class="mt-auto p-4 border-t border-gray-700">
+    <div class="flex items-center justify-between">
+        <span class="text-gray-400 text-sm">Currency</span>
+        <?php include '../includes/currency_switcher.php'; ?>
+    </div>
+</div>
             </div>
             
                         <!-- User Profile Section -->
@@ -86,6 +94,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
                             ?>
                         </p>
                     </div>
+                    
                 </div>
                 
                 <!-- Profile and Logout Buttons -->
@@ -102,3 +111,16 @@ $current_page = basename($_SERVER['PHP_SELF']);
         </div>
     </div>
 </div>
+<script src="../js/currency.js"></script>
+<script>
+    // Initialize currency display when the page loads
+    document.addEventListener('DOMContentLoaded', function() {
+        const currentCurrency = '<?php echo getUserCurrency(); ?>';
+        updatePageCurrencies(currentCurrency);
+        
+        // Listen for currency change events
+        document.addEventListener('currencyChanged', function(e) {
+            updatePageCurrencies(e.detail.currency);
+        });
+    });
+</script>

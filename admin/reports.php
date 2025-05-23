@@ -226,10 +226,7 @@ $incomeByPaymentType = getIncomeByPaymentType($userId, $startDate, $endDate, $pr
 $maintenanceSummary = getMaintenanceSummary($userId, $startDate, $endDate, $propertyId);
 $occupancyRate = getOccupancyRate($userId, $propertyId);
 
-// Format currency
-function formatCurrency($amount) {
-    return '$' . number_format($amount, 2);
-}
+
 ?>
 
 <!DOCTYPE html>

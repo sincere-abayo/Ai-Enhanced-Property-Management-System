@@ -331,7 +331,7 @@ success: '#0ea5e9',
 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
 <div>
-<label class="block text-sm font-medium text-gray-700 mb-1">Monthly Rent</label>
+<label class="block text-sm font-medium text-gray-700 mb-1">Monthly Rent(in RWF)</label>
 <input type="number" name="monthly_rent" value="<?php echo $property['monthly_rent']; ?>" min="0" step="0.01" required class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring-primary">
 </div>
 <div>

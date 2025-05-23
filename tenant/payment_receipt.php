@@ -45,10 +45,7 @@ if (!$payment) {
     exit;
 }
 
-// Format currency function
-function formatCurrency($amount) {
-    return '$' . number_format($amount, 2);
-}
+
 
 // Generate receipt number
 $receiptNumber = 'RCP-' . str_pad($payment['payment_id'], 6, '0', STR_PAD_LEFT);
@@ -190,15 +187,15 @@ if ($payment['unit_number']) {
                                     For period: <?php echo date('M Y', strtotime($payment['payment_date'])); ?>
                                 </div>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium" data-currency-value="<?= $payment['amount'] ?>" data-currency-original="USD">
                                 <?php echo formatCurrency($payment['amount']); ?>
                             </td>
                         </tr>
                     </tbody>
                     <tfoot class="bg-gray-50">
                         <tr>
-                            <td class="px-6 py-3 text-right text-sm font-medium">Total</td>
-                            <td class="px-6 py-3 text-right text-sm font-medium"><?php echo formatCurrency($payment['amount']); ?></td>
+                            <td class="px-6 py-3 text-right text-sm font-medium" >Total</td>
+                            <td class="px-6 py-3 text-right text-sm font-medium" data-currency-value="<?= $payment['amount'] ?>" data-currency-original="USD"><?php echo formatCurrency($payment['amount']); ?></td>
                         </tr>
                     </tfoot>
                 </table>

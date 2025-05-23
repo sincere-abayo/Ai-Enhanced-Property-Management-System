@@ -144,10 +144,7 @@ foreach ($payments as $payment) {
 $totalPayments = $onTimePayments + $latePayments;
 $reliabilityScore = $totalPayments > 0 ? round(($onTimePayments / $totalPayments) * 100) : 0;
 
-// Format currency
-function formatCurrency($amount) {
-    return '$' . number_format($amount, 2);
-}
+
 
 // Get status class for styling
 function getStatusClass($status) {

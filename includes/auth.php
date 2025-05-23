@@ -78,3 +78,24 @@ function logout() {
     header('Location: ../index.php');
     exit;
 }
+// Add this to the existing auth.php file
+
+/**
+ * Set user's preferred currency
+ * 
+ * @param string $currency Currency code (USD or RWF)
+ */
+function setUserCurrency($currency) {
+    if ($currency === 'USD' || $currency === 'RWF') {
+        $_SESSION['currency'] = $currency;
+    }
+}
+
+/**
+ * Get user's preferred currency
+ * 
+ * @return string Currency code (USD or RWF)
+ */
+function getUserCurrency() {
+    return $_SESSION['currency'] ?? 'USD'; // Default to USD
+}
