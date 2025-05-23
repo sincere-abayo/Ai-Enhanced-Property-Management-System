@@ -43,6 +43,7 @@ function requireLogin() {
         header('Location: ../index.php');
         exit;
     }
+
 }
 
 /**
@@ -62,6 +63,7 @@ function requireRole($role) {
         }
         exit;
     }
+    
 }
 
 /**
@@ -98,4 +100,7 @@ function setUserCurrency($currency) {
  */
 function getUserCurrency() {
     return $_SESSION['currency'] ?? 'USD'; // Default to USD
-}
+}    // Get user information
+$userId = $_SESSION['user_id'];
+$firstName = $_SESSION['first_name'];
+$lastName = $_SESSION['last_name'];

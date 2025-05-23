@@ -104,7 +104,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_tenant'])) {
     $propertyId = (int)$_POST['property_id'];
     $startDate = $_POST['start_date'];
     $endDate = $_POST['end_date'];
-    $password = generateRandomPassword(); // Function to generate a random password
+    // $password = generateRandomPassword(); // Function to generate a random password
+    $password = "tenant123"; // Function to generate a random password
     
     // Validate input
     $errors = [];
@@ -288,15 +289,19 @@ if (isset($_GET['delete']) && is_numeric($_GET['delete'])) {
 }
 
 // Helper function to generate a random password
-function generateRandomPassword($length = 10) {
+
+
+function generateRandomPassword($length = 8) {
+
     $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
     $password = '';
-    for ($i = 0; $i < $length; $i++) {
+
+    for ($i = 0; $i < 8; $i++) {
         $password .= $characters[rand(0, strlen($characters) - 1)];
     }
     return $password;
-}
 
+}
 // Get payment status class for styling
 function getPaymentStatusClass($status) {
     switch ($status) {
@@ -328,6 +333,7 @@ function getLeaseStatusClass($status) {
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -335,22 +341,23 @@ function getLeaseStatusClass($status) {
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#1a56db',
-                        secondary: '#7e3af2',
-                        success: '#0ea5e9',
-                    }
+    tailwind.config = {
+        theme: {
+            extend: {
+                colors: {
+                    primary: '#1a56db',
+                    secondary: '#7e3af2',
+                    success: '#0ea5e9',
                 }
             }
         }
+    }
     </script>
 </head>
+
 <body class="bg-gray-50">
     <!-- Sidebar -->
-    <?php include 'admin_sidebar.php'; ?>    
+    <?php include 'admin_sidebar.php'; ?>
 
     <!-- Main Content -->
     <div class="ml-64 p-8">
@@ -367,31 +374,31 @@ function getLeaseStatusClass($status) {
 
         <!-- Success/Error Messages -->
         <?php if (isset($_SESSION['success'])): ?>
-            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6">
-                <?php 
+        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6">
+            <?php 
                     echo $_SESSION['success']; 
                     unset($_SESSION['success']);
                 ?>
-            </div>
+        </div>
         <?php endif; ?>
 
         <?php if (isset($_SESSION['error'])): ?>
-            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
-                <?php 
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+            <?php 
                     echo $_SESSION['error']; 
                     unset($_SESSION['error']);
                 ?>
-            </div>
+        </div>
         <?php endif; ?>
 
         <?php if (!empty($errors)): ?>
-            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
-                <ul class="list-disc list-inside">
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+            <ul class="list-disc list-inside">
                 <?php foreach ($errors as $error): ?>
-                        <li><?php echo $error; ?></li>
-                    <?php endforeach; ?>
-                </ul>
-            </div>
+                <li><?php echo $error; ?></li>
+                <?php endforeach; ?>
+            </ul>
+        </div>
         <?php endif; ?>
 
         <!-- Tenant Filters -->
@@ -399,7 +406,8 @@ function getLeaseStatusClass($status) {
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                    <select id="status-filter" class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring-primary">
+                    <select id="status-filter"
+                        class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring-primary">
                         <option value="all">All</option>
                         <option value="active">Active</option>
                         <option value="expired">Expired</option>
@@ -408,18 +416,20 @@ function getLeaseStatusClass($status) {
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Property</label>
-                    <select id="property-filter" class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring-primary">
+                    <select id="property-filter"
+                        class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring-primary">
                         <option value="all">All Properties</option>
                         <?php foreach ($properties as $property): ?>
-                            <option value="<?php echo $property['property_id']; ?>">
-                                <?php echo htmlspecialchars($property['property_name']); ?>
-                            </option>
+                        <option value="<?php echo $property['property_id']; ?>">
+                            <?php echo htmlspecialchars($property['property_name']); ?>
+                        </option>
                         <?php endforeach; ?>
                     </select>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Payment Status</label>
-                    <select id="payment-filter" class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring-primary">
+                    <select id="payment-filter"
+                        class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring-primary">
                         <option value="all">All</option>
                         <option value="paid">Paid</option>
                         <option value="pending">Pending</option>
@@ -428,7 +438,8 @@ function getLeaseStatusClass($status) {
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Search</label>
-                    <input type="text" id="search-filter" placeholder="Search tenants..." class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring-primary">
+                    <input type="text" id="search-filter" placeholder="Search tenants..."
+                        class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring-primary">
                 </div>
             </div>
         </div>
@@ -436,56 +447,71 @@ function getLeaseStatusClass($status) {
         <!-- Tenants Table -->
         <div class="bg-white rounded-xl shadow-md overflow-hidden">
             <?php if (empty($tenants)): ?>
-                <div class="p-8 text-center">
-                    <p class="text-gray-500 mb-2">No tenants found</p>
-                    <p class="text-sm text-gray-500">Click the "Add Tenant" button to add a new tenant.</p>
-                </div>
+            <div class="p-8 text-center">
+                <p class="text-gray-500 mb-2">No tenants found</p>
+                <p class="text-sm text-gray-500">Click the "Add Tenant" button to add a new tenant.</p>
+            </div>
             <?php else: ?>
-                <div class="overflow-x-auto">
-                    <table class="w-full">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tenant</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Property</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lease Period</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Payment Status</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
-                            <?php foreach ($tenants as $tenant): ?>
-                                <?php 
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Tenant</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Property</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Lease Period</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Payment Status</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <?php foreach ($tenants as $tenant): ?>
+                        <?php 
                                     $paymentStatus = getTenantPaymentStatus($tenant['user_id']);
                                     $leaseEnding = (strtotime($tenant['end_date']) - time()) / (60 * 60 * 24) <= 30;
                                 ?>
-                                <tr class="tenant-row" 
-                                    data-status="<?php echo $tenant['lease_status']; ?>"
-                                    data-property="<?php echo $tenant['property_id']; ?>"
-                                    data-payment="<?php echo $paymentStatus; ?>"
-                                    data-name="<?php echo strtolower($tenant['first_name'] . ' ' . $tenant['last_name']); ?>"
-                                    data-email="<?php echo strtolower($tenant['email']); ?>">
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="flex items-center">
-                                            <div class="flex-shrink-0 h-10 w-10">
-                                                <img class="h-10 w-10 rounded-full" src="https://ui-avatars.com/api/?name=<?php echo urlencode($tenant['first_name'] . '+' . $tenant['last_name']); ?>&background=random" alt="Tenant">
-                                            </div>
-                                            <div class="ml-4">
-                                                <div class="text-sm font-medium text-gray-900"><?php echo htmlspecialchars($tenant['first_name'] . ' ' . $tenant['last_name']); ?></div>
-                                                <div class="text-sm text-gray-500"><?php echo htmlspecialchars($tenant['email']); ?></div>
-                                                <?php if (!empty($tenant['phone'])): ?>
-                                                    <div class="text-sm text-gray-500"><?php echo htmlspecialchars($tenant['phone']); ?></div>
-                                                <?php endif; ?>
-                                            </div>
+                        <tr class="tenant-row" data-status="<?php echo $tenant['lease_status']; ?>"
+                            data-property="<?php echo $tenant['property_id']; ?>"
+                            data-payment="<?php echo $paymentStatus; ?>"
+                            data-name="<?php echo strtolower($tenant['first_name'] . ' ' . $tenant['last_name']); ?>"
+                            data-email="<?php echo strtolower($tenant['email']); ?>">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0 h-10 w-10">
+                                        <img class="h-10 w-10 rounded-full"
+                                            src="https://ui-avatars.com/api/?name=<?php echo urlencode($tenant['first_name'] . '+' . $tenant['last_name']); ?>&background=random"
+                                            alt="Tenant">
+                                    </div>
+                                    <div class="ml-4">
+                                        <div class="text-sm font-medium text-gray-900">
+                                            <?php echo htmlspecialchars($tenant['first_name'] . ' ' . $tenant['last_name']); ?>
                                         </div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm text-gray-900"><?php echo htmlspecialchars($tenant['property_name']); ?></div>
-                                        <div class="text-sm text-gray-500"><?php echo htmlspecialchars($tenant['address'] . ', ' . $tenant['city']); ?></div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm text-gray-900"><?php echo date('M j, Y', strtotime($tenant['start_date'])); ?> - <?php echo date('M j, Y', strtotime($tenant['end_date'])); ?></div>
-                                        <div class="text-sm <?php echo $leaseEnding ? 'text-red-500 font-semibold' : 'text-gray-500'; ?>">
-                                            <?php 
+                                        <div class="text-sm text-gray-500">
+                                            <?php echo htmlspecialchars($tenant['email']); ?></div>
+                                        <?php if (!empty($tenant['phone'])): ?>
+                                        <div class="text-sm text-gray-500">
+                                            <?php echo htmlspecialchars($tenant['phone']); ?></div>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">
+                                    <?php echo htmlspecialchars($tenant['property_name']); ?></div>
+                                <div class="text-sm text-gray-500">
+                                    <?php echo htmlspecialchars($tenant['address'] . ', ' . $tenant['city']); ?></div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-900">
+                                    <?php echo date('M j, Y', strtotime($tenant['start_date'])); ?> -
+                                    <?php echo date('M j, Y', strtotime($tenant['end_date'])); ?></div>
+                                <div
+                                    class="text-sm <?php echo $leaseEnding ? 'text-red-500 font-semibold' : 'text-gray-500'; ?>">
+                                    <?php 
                                                 $days = round((strtotime($tenant['end_date']) - time()) / (60 * 60 * 24));
                                                 if ($days < 0) {
                                                     echo "Expired " . abs($days) . " days ago";
@@ -495,23 +521,28 @@ function getLeaseStatusClass($status) {
                                                     echo $days . " days remaining";
                                                 }
                                             ?>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full <?php echo getPaymentStatusClass($paymentStatus); ?>">
-                                            <?php echo ucfirst($paymentStatus); ?>
-                                        </span>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                        <a href="tenant_details.php?id=<?php echo $tenant['user_id']; ?>" class="text-primary hover:text-blue-700 mr-3">View</a>
-                                        <a href="edit_tenant.php?id=<?php echo $tenant['user_id']; ?>" class="text-primary hover:text-blue-700 mr-3">Edit</a>
-                                        <a href="#" onclick="confirmDelete(<?php echo $tenant['user_id']; ?>, '<?php echo htmlspecialchars(addslashes($tenant['first_name'] . ' ' . $tenant['last_name'])); ?>')" class="text-red-600 hover:text-red-900">Delete</a>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span
+                                    class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full <?php echo getPaymentStatusClass($paymentStatus); ?>">
+                                    <?php echo ucfirst($paymentStatus); ?>
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <a href="tenant_details.php?id=<?php echo $tenant['user_id']; ?>"
+                                    class="text-primary hover:text-blue-700 mr-3">View</a>
+                                <a href="edit_tenant.php?id=<?php echo $tenant['user_id']; ?>"
+                                    class="text-primary hover:text-blue-700 mr-3">Edit</a>
+                                <a href="#"
+                                    onclick="confirmDelete(<?php echo $tenant['user_id']; ?>, '<?php echo htmlspecialchars(addslashes($tenant['first_name'] . ' ' . $tenant['last_name'])); ?>')"
+                                    class="text-red-600 hover:text-red-900">Delete</a>
+                            </td>
+                        </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
             <?php endif; ?>
         </div>
     </div>
@@ -520,7 +551,8 @@ function getLeaseStatusClass($status) {
     <div id="addTenantModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
         <div class="bg-white rounded-xl p-8 max-w-2xl w-full mx-4">
             <div class="flex justify-between items-center mb-6">
-                <h3 class="text-2xl font-bold">Add New Tenant</h3>
+                <h3 class="text-2xl font-bold">Add New Tenant </h3>
+                <p class="text-sm text-gray-500 mb-2">NB: Tenant will get default password of "tenant123"</p>
                 <button onclick="closeAddTenantModal()" class="text-gray-500 hover:text-gray-700">
                     <i class="fas fa-times"></i>
                 </button>
@@ -529,48 +561,57 @@ function getLeaseStatusClass($status) {
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">First Name</label>
-                        <input type="text" name="first_name" required class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring-primary">
+                        <input type="text" name="first_name" required
+                            class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring-primary">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
-                        <input type="text" name="last_name" required class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring-primary">
+                        <input type="text" name="last_name" required
+                            class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring-primary">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                        <input type="email" name="email" required class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring-primary">
+                        <input type="email" name="email" required
+                            class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring-primary">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
-                        <input type="tel" name="phone" class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring-primary">
+                        <input type="tel" name="phone"
+                            class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring-primary">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Property</label>
-                        <select name="property_id" required class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring-primary">
+                        <select name="property_id" required
+                            class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring-primary">
                             <option value="">Select Property</option>
                             <?php foreach ($properties as $property): ?>
-                                <option value="<?php echo $property['property_id']; ?>">
-                                    <?php echo htmlspecialchars($property['property_name'] . ' - ' . $property['address']); ?>
-                                </option>
+                            <option value="<?php echo $property['property_id']; ?>">
+                                <?php echo htmlspecialchars($property['property_name'] . ' - ' . $property['address']); ?>
+                            </option>
                             <?php endforeach; ?>
                         </select>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Lease Start Date</label>
-                        <input type="date" name="start_date" required class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring-primary">
+                        <input type="date" name="start_date" required
+                            class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring-primary">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Lease End Date</label>
-                        <input type="date" name="end_date" required class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring-primary">
+                        <input type="date" name="end_date" required
+                            class="w-full rounded-lg border-gray-300 focus:border-primary focus:ring-primary">
                     </div>
                 </div>
                 <div class="mt-4 text-sm text-gray-500">
                     <p>A temporary password will be generated for the tenant. They can change it after logging in.</p>
                 </div>
                 <div class="flex justify-end space-x-4 mt-6">
-                    <button type="button" onclick="closeAddTenantModal()" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+                    <button type="button" onclick="closeAddTenantModal()"
+                        class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
                         Cancel
                     </button>
-                    <button type="submit" name="add_tenant" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-700">
+                    <button type="submit" name="add_tenant"
+                        class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-700">
                         Add Tenant
                     </button>
                 </div>
@@ -583,10 +624,13 @@ function getLeaseStatusClass($status) {
         <div class="bg-white rounded-xl p-8 max-w-md w-full mx-4">
             <div class="mb-6">
                 <h3 class="text-xl font-bold mb-2">Confirm Deletion</h3>
-                <p class="text-gray-600">Are you sure you want to delete <span id="tenantName" class="font-semibold"></span>? This will remove all their lease information and payment history.</p>
+                <p class="text-gray-600">Are you sure you want to delete <span id="tenantName"
+                        class="font-semibold"></span>? This will remove all their lease information and payment history.
+                </p>
             </div>
             <div class="flex justify-end space-x-4">
-                <button onclick="closeDeleteModal()" class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+                <button onclick="closeDeleteModal()"
+                    class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
                     Cancel
                 </button>
                 <a id="confirmDeleteBtn" href="#" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
@@ -597,81 +641,82 @@ function getLeaseStatusClass($status) {
     </div>
 
     <script>
-        // Modal functions
-        function openAddTenantModal() {
-            document.getElementById('addTenantModal').classList.remove('hidden');
-            document.getElementById('addTenantModal').classList.add('flex');
+    // Modal functions
+    function openAddTenantModal() {
+        document.getElementById('addTenantModal').classList.remove('hidden');
+        document.getElementById('addTenantModal').classList.add('flex');
+    }
+
+    function closeAddTenantModal() {
+        document.getElementById('addTenantModal').classList.add('hidden');
+        document.getElementById('addTenantModal').classList.remove('flex');
+    }
+
+    function confirmDelete(tenantId, tenantName) {
+        document.getElementById('tenantName').textContent = tenantName;
+        document.getElementById('confirmDeleteBtn').href = 'tenants.php?delete=' + tenantId;
+        document.getElementById('deleteModal').classList.remove('hidden');
+        document.getElementById('deleteModal').classList.add('flex');
+    }
+
+    function closeDeleteModal() {
+        document.getElementById('deleteModal').classList.add('hidden');
+        document.getElementById('deleteModal').classList.remove('flex');
+    }
+
+    // Close modals when clicking outside
+    document.getElementById('addTenantModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeAddTenantModal();
+        }
+    });
+
+    document.getElementById('deleteModal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            closeDeleteModal();
+        }
+    });
+
+    // Filtering functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        const statusFilter = document.getElementById('status-filter');
+        const propertyFilter = document.getElementById('property-filter');
+        const paymentFilter = document.getElementById('payment-filter');
+        const searchFilter = document.getElementById('search-filter');
+        const tenantRows = document.querySelectorAll('.tenant-row');
+
+        function applyFilters() {
+            const statusValue = statusFilter.value;
+            const propertyValue = propertyFilter.value;
+            const paymentValue = paymentFilter.value;
+            const searchValue = searchFilter.value.toLowerCase();
+
+            tenantRows.forEach(row => {
+                const status = row.getAttribute('data-status');
+                const property = row.getAttribute('data-property');
+                const payment = row.getAttribute('data-payment');
+                const name = row.getAttribute('data-name');
+                const email = row.getAttribute('data-email');
+
+                let statusMatch = statusValue === 'all' || status === statusValue;
+                let propertyMatch = propertyValue === 'all' || property === propertyValue;
+                let paymentMatch = paymentValue === 'all' || payment === paymentValue;
+                let searchMatch = name.includes(searchValue) || email.includes(searchValue);
+
+                if (statusMatch && propertyMatch && paymentMatch && searchMatch) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
         }
 
-        function closeAddTenantModal() {
-            document.getElementById('addTenantModal').classList.add('hidden');
-            document.getElementById('addTenantModal').classList.remove('flex');
-        }
-
-        function confirmDelete(tenantId, tenantName) {
-            document.getElementById('tenantName').textContent = tenantName;
-            document.getElementById('confirmDeleteBtn').href = 'tenants.php?delete=' + tenantId;
-            document.getElementById('deleteModal').classList.remove('hidden');
-            document.getElementById('deleteModal').classList.add('flex');
-        }
-
-        function closeDeleteModal() {
-            document.getElementById('deleteModal').classList.add('hidden');
-            document.getElementById('deleteModal').classList.remove('flex');
-        }
-
-               // Close modals when clicking outside
-               document.getElementById('addTenantModal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeAddTenantModal();
-            }
-        });
-
-        document.getElementById('deleteModal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeDeleteModal();
-            }
-        });
-
-        // Filtering functionality
-        document.addEventListener('DOMContentLoaded', function() {
-            const statusFilter = document.getElementById('status-filter');
-            const propertyFilter = document.getElementById('property-filter');
-            const paymentFilter = document.getElementById('payment-filter');
-            const searchFilter = document.getElementById('search-filter');
-            const tenantRows = document.querySelectorAll('.tenant-row');
-
-            function applyFilters() {
-                const statusValue = statusFilter.value;
-                const propertyValue = propertyFilter.value;
-                const paymentValue = paymentFilter.value;
-                const searchValue = searchFilter.value.toLowerCase();
-
-                tenantRows.forEach(row => {
-                    const status = row.getAttribute('data-status');
-                    const property = row.getAttribute('data-property');
-                    const payment = row.getAttribute('data-payment');
-                    const name = row.getAttribute('data-name');
-                    const email = row.getAttribute('data-email');
-                    
-                    let statusMatch = statusValue === 'all' || status === statusValue;
-                    let propertyMatch = propertyValue === 'all' || property === propertyValue;
-                    let paymentMatch = paymentValue === 'all' || payment === paymentValue;
-                    let searchMatch = name.includes(searchValue) || email.includes(searchValue);
-                    
-                    if (statusMatch && propertyMatch && paymentMatch && searchMatch) {
-                        row.style.display = '';
-                    } else {
-                        row.style.display = 'none';
-                    }
-                });
-            }
-            
-            statusFilter.addEventListener('change', applyFilters);
-            propertyFilter.addEventListener('change', applyFilters);
-            paymentFilter.addEventListener('change', applyFilters);
-            searchFilter.addEventListener('input', applyFilters);
-        });
+        statusFilter.addEventListener('change', applyFilters);
+        propertyFilter.addEventListener('change', applyFilters);
+        paymentFilter.addEventListener('change', applyFilters);
+        searchFilter.addEventListener('input', applyFilters);
+    });
     </script>
 </body>
+
 </html>

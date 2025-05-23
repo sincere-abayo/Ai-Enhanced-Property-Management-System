@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS users (
 
 -- Properties table
 CREATE TABLE IF NOT EXISTS properties (
-    property_id INT AUTO_INCREMENT PRIMARY KEY,
+    property_id INT AUTO_INCREMENT PRIMARY KEY, 
     landlord_id INT NOT NULL,
     property_name VARCHAR(100) NOT NULL,
     address VARCHAR(255) NOT NULL,
