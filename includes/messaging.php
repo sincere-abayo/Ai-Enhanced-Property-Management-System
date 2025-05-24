@@ -109,7 +109,7 @@ function sendSMS($phoneNumber, $message) {
  */
 function getEmailTemplate($subject, $message, $sender) {
     $senderName = $sender['first_name'] . ' ' . $sender['last_name'];
-    $senderRole = ucfirst($sender['role']);
+    $senderRole = ucfirst(string: $sender['role']);
     
     return <<<HTML
     <!DOCTYPE html>

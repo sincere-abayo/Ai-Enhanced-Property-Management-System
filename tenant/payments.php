@@ -2,6 +2,7 @@
 require_once '../includes/db_connect.php';
 require_once '../includes/auth.php';
 require_once '../includes/functions.php';
+require_once '../includes/paypal_config.php';
 
 // Require tenant role
 requireRole('tenant');
@@ -80,11 +81,18 @@ foreach ($payments as $payment) {
 
 $paymentHistoryMonths = count($paymentMonths);
 
+// Check for success or error messages
+$success = isset($_SESSION['success']) ? $_SESSION['success'] : null;
+$error = isset($_SESSION['error']) ? $_SESSION['error'] : null;
 
+// Clear session messages
+unset($_SESSION['success']);
+unset($_SESSION['error']);
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -92,19 +100,20 @@ $paymentHistoryMonths = count($paymentMonths);
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#1a56db',
-                        secondary: '#7e3af2',
-                        success: '#0ea5e9',
-                    }
+    tailwind.config = {
+        theme: {
+            extend: {
+                colors: {
+                    primary: '#1a56db',
+                    secondary: '#7e3af2',
+                    success: '#0ea5e9',
                 }
             }
         }
+    }
     </script>
 </head>
+
 <body class="bg-gray-50">
     <!-- Sidebar -->
     <?php include 'tenant_sidebar.php'; ?>
@@ -118,13 +127,25 @@ $paymentHistoryMonths = count($paymentMonths);
                 <p class="text-gray-600">Manage your rent payments and view payment history</p>
             </div>
             <div class="flex space-x-4">
-                <button onclick="exportPaymentHistory()" class="bg-white text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 border border-gray-300">
+                <button onclick="exportPaymentHistory()"
+                    class="bg-white text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 border border-gray-300">
                     <i class="fas fa-download mr-2"></i>Download History
                 </button>
             </div>
-
-
         </div>
+
+        <!-- Success/Error Messages -->
+        <?php if ($success): ?>
+        <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6">
+            <p><?php echo htmlspecialchars($success); ?></p>
+        </div>
+        <?php endif; ?>
+
+        <?php if ($error): ?>
+        <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6">
+            <p><?php echo htmlspecialchars($error); ?></p>
+        </div>
+        <?php endif; ?>
 
         <!-- Payment Summary -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -136,13 +157,14 @@ $paymentHistoryMonths = count($paymentMonths);
                     <div class="ml-4">
                         <h3 class="text-gray-500 text-sm">Next Payment</h3>
                         <?php if ($lease): ?>
-                            <p class="text-2xl font-semibold" data-currency-value="<?= $nextPayment['amount'] ?>" data-currency-original="USD"><?php echo formatCurrency($nextPayment['amount']); ?></p>
-                            <p class="text-sm <?php echo $daysUntilDue <= 5 ? 'text-red-500' : 'text-green-500'; ?>">
-                                Due in <?php echo $daysUntilDue; ?> days
-                            </p>
+                        <p class="text-2xl font-semibold" data-currency-value="<?= $nextPayment['amount'] ?>"
+                            data-currency-original="USD"><?php echo formatCurrency($nextPayment['amount']); ?></p>
+                        <p class="text-sm <?php echo $daysUntilDue <= 5 ? 'text-red-500' : 'text-green-500'; ?>">
+                            Due in <?php echo $daysUntilDue; ?> days
+                        </p>
                         <?php else: ?>
-                            <p class="text-2xl font-semibold">N/A</p>
-                            <p class="text-sm text-yellow-500">No active lease</p>
+                        <p class="text-2xl font-semibold">N/A</p>
+                        <p class="text-sm text-yellow-500">No active lease</p>
                         <?php endif; ?>
                     </div>
                 </div>
@@ -156,9 +178,9 @@ $paymentHistoryMonths = count($paymentMonths);
                         <h3 class="text-gray-500 text-sm">Payment History</h3>
                         <p class="text-2xl font-semibold"><?php echo $paymentHistoryMonths; ?> Months</p>
                         <?php if ($paymentHistoryMonths > 0): ?>
-                            <p class="text-sm text-green-500">All payments on time</p>
+                        <p class="text-sm text-green-500">All payments on time</p>
                         <?php else: ?>
-                            <p class="text-sm text-gray-500">No payment history</p>
+                        <p class="text-sm text-gray-500">No payment history</p>
                         <?php endif; ?>
                     </div>
                 </div>
@@ -170,7 +192,8 @@ $paymentHistoryMonths = count($paymentMonths);
                     </div>
                     <div class="ml-4">
                         <h3 class="text-gray-500 text-sm">Total Paid</h3>
-                        <p class="text-2xl font-semibold" data-currency-value="<?= $totalPaid ?>" data-currency-original="USD"><?php echo formatCurrency($totalPaid); ?></p>
+                        <p class="text-2xl font-semibold" data-currency-value="<?= $totalPaid ?>"
+                            data-currency-original="USD"><?php echo formatCurrency($totalPaid); ?></p>
                         <p class="text-sm text-green-500">Last 12 months</p>
                     </div>
                 </div>
@@ -180,64 +203,130 @@ $paymentHistoryMonths = count($paymentMonths);
         <?php if ($lease): ?>
         <!-- Make Payment Section -->
         <div class="bg-white rounded-xl shadow-md p-6 mb-8">
-            <h3 class="text-lg font-semibold mb-4">Payment Information</h3>
-            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                <div>
-                    <p class="text-sm text-gray-500">Current Balance Due</p>
-                    <p class="text-xl font-semibold" data-currency-value="<?= $nextPayment['amount'] ?>" data-currency-original="USD"><?php echo formatCurrency($nextPayment['amount']); ?></p>
-                    <p class="text-sm text-gray-500">Due Date: <?php echo $nextPayment['formatted_date']; ?></p>
+            <h3 class="text-lg font-semibold mb-4">Make Payment</h3>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Payment Information -->
+                <div class="p-4 bg-gray-50 rounded-lg">
+                    <h4 class="font-medium mb-2">Payment Details</h4>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Amount Due:</span>
+                            <span class="font-semibold" data-currency-value="<?= $nextPayment['amount'] ?>"
+                                data-currency-original="USD"><?php echo formatCurrency($nextPayment['amount']); ?></span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Due Date:</span>
+                            <span><?php echo $nextPayment['formatted_date']; ?></span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Property:</span>
+                            <span><?php echo htmlspecialchars($lease['property_name']); ?></span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Payment For:</span>
+                            <span>Monthly Rent</span>
+                        </div>
+                    </div>
                 </div>
-                <div>
-                    <div class="bg-blue-50 text-blue-700 px-4 py-3 rounded-lg">
-                        <p class="text-sm font-medium">Please make your payment using the method specified in your lease agreement.</p>
-                        <p class="text-xs mt-1">Contact your landlord if you have any questions about payment options.</p>
+
+                <!-- Payment Options -->
+                <div class="space-y-4">
+                    <h4 class="font-medium">Choose Payment Method</h4>
+
+                    <!-- PayPal Payment Button -->
+                    <div class="border rounded-lg p-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center">
+                                <i class="fab fa-paypal text-blue-600 text-2xl mr-3"></i>
+                                <div>
+                                    <h5 class="font-medium">PayPal</h5>
+                                    <p class="text-sm text-gray-600">Pay securely with PayPal</p>
+                                </div>
+                            </div>
+                            <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">Secure</span>
+                        </div>
+                        <form action="process_paypal_payment.php" method="POST">
+                            <input type="hidden" name="lease_id" value="<?php echo $lease['lease_id']; ?>">
+                            <input type="hidden" name="amount" value="<?php echo $nextPayment['amount']; ?>">
+                            <input type="hidden" name="description"
+                                value="Rent payment for <?php echo htmlspecialchars($lease['property_name']); ?>">
+                            <button type="submit"
+                                class="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition duration-200">
+                                <i class="fab fa-paypal mr-2"></i>Pay with PayPal
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Manual Payment Option -->
+                    <div class="border rounded-lg p-4">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex items-center">
+                                <i class="fas fa-money-bill-wave text-green-600 text-2xl mr-3"></i>
+                                <div>
+                                    <h5 class="font-medium">Other Payment Methods</h5>
+                                    <p class="text-sm text-gray-600">Cash, Bank Transfer, etc.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <button onclick="openManualPaymentModal()"
+                            class="w-full bg-gray-600 text-white py-3 px-4 rounded-lg hover:bg-gray-700 transition duration-200">
+                            <i class="fas fa-plus mr-2"></i>Record Manual Payment
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
-
         <?php endif; ?>
 
-        <!-- Mark Payment Modal -->
-        <div id="markPaymentModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center">
+        <!-- Manual Payment Modal -->
+        <div id="manualPaymentModal"
+            class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
             <div class="bg-white rounded-xl p-6 w-full max-w-md">
                 <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-semibold">Mark Payment as Paid</h3>
-                    <button onclick="closeModal()" class="text-gray-500 hover:text-gray-700">
+                    <h3 class="text-lg font-semibold">Record Manual Payment</h3>
+                    <button onclick="closeManualPaymentModal()" class="text-gray-500 hover:text-gray-700">
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
-                <form action="process_payment.php" method="POST" class="space-y-4">
+                <form action="process_manual_payment.php" method="POST" class="space-y-4">
                     <input type="hidden" name="lease_id" value="<?php echo $lease ? $lease['lease_id'] : ''; ?>">
-                    
+
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Payment Method</label>
-                        <select name="payment_method" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                        <select name="payment_method"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
                             <option value="cash">Cash</option>
                             <option value="bank_transfer">Bank Transfer</option>
-                            <option value="credit_card">Credit Card</option>
                             <option value="mobile_money">Mobile Money</option>
+                            <option value="check">Check</option>
                             <option value="other">Other</option>
                         </select>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Payment Date</label>
-                        <input type="date" name="payment_date" value="<?php echo date('Y-m-d'); ?>" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
+                        <input type="date" name="payment_date" value="<?php echo date('Y-m-d'); ?>"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Amount</label>
-                        <input type="number" name="amount" step="0.01" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary " value="<?php echo $lease ? $lease['monthly_rent'] : '0.00'; ?>">
+                        <input type="number" name="amount" step="0.01"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
+                            value="<?php echo $lease ? $lease['monthly_rent'] : '0.00'; ?>">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Reference Number (Optional)</label>
-                        <input type="text" name="reference" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary" placeholder="Enter reference number">
+                        <input type="text" name="reference"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-primary focus:border-primary"
+                            placeholder="Enter reference number">
                     </div>
                     <div class="flex space-x-4">
-                        <button type="button" onclick="closeModal()" class="flex-1 bg-white text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-50 border border-gray-300">
+                        <button type="button" onclick="closeManualPaymentModal()"
+                            class="flex-1 bg-white text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-50 border border-gray-300">
                             Cancel
                         </button>
-                        <button type="submit" class="flex-1 bg-primary text-white py-2 px-4 rounded-lg hover:bg-blue-700">
-                            Mark as Paid
+                        <button type="submit"
+                            class="flex-1 bg-primary text-white py-2 px-4 rounded-lg hover:bg-blue-700">
+                            Record Payment
                         </button>
                     </div>
                 </form>
@@ -248,75 +337,117 @@ $paymentHistoryMonths = count($paymentMonths);
         <div class="bg-white rounded-xl shadow-md p-6">
             <h3 class="text-lg font-semibold mb-4">Payment History</h3>
             <?php if (empty($payments)): ?>
-                <div class="text-center py-8">
-                    <p class="text-gray-500">No payment history available.</p>
-                    <?php if ($lease): ?>
-                        <p class="text-sm text-gray-500 mt-2">Make your first payment to see it here.</p>
-                    <?php endif; ?>
-                </div>
+            <div class="text-center py-8">
+                <p class="text-gray-500">No payment history available.</p>
+                <?php if ($lease): ?>
+                <p class="text-sm text-gray-500 mt-2">Make your first payment to see it here.</p>
+                <?php endif; ?>
+            </div>
             <?php else: ?>
-                <div class="overflow-x-auto">
-                    <table class="w-full">
-                        <thead class="bg-gray-50">
-                            <tr>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Method</th>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-gray-200">
-                            <?php foreach ($payments as $payment): ?>
-                                <tr>
-                                    <td class="px-4 py-3">
-                                        <div class="text-sm font-medium"><?php echo date('M j, Y', strtotime($payment['payment_date'])); ?></div>
-                                    </td>
-                                    <td class="px-4 py-3">
-                                        <div class="text-sm font-medium" data-currency-value="<?= $payment['amount'] ?>" data-currency-original="USD"><?php echo formatCurrency($payment['amount']); ?></div>
-                                    </td>
-                                    <td class="px-4 py-3">
-                                        <div class="text-sm"><?php echo ucfirst(str_replace('_', ' ', $payment['payment_method'])); ?></div>
-                                    </td>
-                                    <td class="px-4 py-3">
-                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                            Paid
-                                        </span>
-                                    </td>
-                                    <td class="px-4 py-3">
-                                        <a href="payment_receipt.php?id=<?php echo $payment['payment_id']; ?>" class="text-primary hover:text-blue-700">
-                                            <i class="fas fa-receipt"></i> Receipt
-                                        </a>
-                                    </td>
-                                </tr>
-                                <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                </div>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Amount</th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Method</th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Transaction ID
+                            </th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200">
+                        <?php foreach ($payments as $payment): ?>
+                        <tr>
+                            <td class="px-4 py-3">
+                                <div class="text-sm font-medium">
+                                    <?php echo date('M j, Y', strtotime($payment['payment_date'])); ?></div>
+                            </td>
+                            <td class="px-4 py-3">
+                                <div class="text-sm font-medium" data-currency-value="<?= $payment['amount'] ?>"
+                                    data-currency-original="USD"><?php echo formatCurrency($payment['amount']); ?></div>
+                            </td>
+                            <td class="px-4 py-3">
+                                <div class="text-sm flex items-center">
+                                    <?php if ($payment['payment_method'] == 'paypal'): ?>
+                                    <i class="fab fa-paypal text-blue-600 mr-2"></i>
+                                    <?php elseif ($payment['payment_method'] == 'mobile_money'): ?>
+                                    <i class="fas fa-mobile-alt text-green-600 mr-2"></i>
+                                    <?php else: ?>
+                                    <i class="fas fa-money-bill-wave text-gray-600 mr-2"></i>
+                                    <?php endif; ?>
+                                    <?php echo ucfirst(str_replace('_', ' ', $payment['payment_method'])); ?>
+                                </div>
+                            </td>
+                            <td class="px-4 py-3">
+                                <?php
+                                        $statusClass = 'bg-green-100 text-green-800';
+                                        $statusText = 'Paid';
+                                        
+                                        if (isset($payment['gateway_status'])) {
+                                            switch ($payment['gateway_status']) {
+                                                case 'pending':
+                                                    $statusClass = 'bg-yellow-100 text-yellow-800';
+                                                    $statusText = 'Pending';
+                                                    break;
+                                                case 'failed':
+                                                    $statusClass = 'bg-red-100 text-red-800';
+                                                    $statusText = 'Failed';
+                                                    break;
+                                                case 'cancelled':
+                                                    $statusClass = 'bg-gray-100 text-gray-800';
+                                                    $statusText = 'Cancelled';
+                                                    break;
+                                            }
+                                        }
+                                        ?>
+                                <span
+                                    class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full <?php echo $statusClass; ?>">
+                                    <?php echo $statusText; ?>
+                                </span>
+                            </td>
+                            <td class="px-4 py-3">
+                                <div class="text-sm text-gray-500">
+                                    <?php echo $payment['gateway_transaction_id'] ? htmlspecialchars($payment['gateway_transaction_id']) : 'N/A'; ?>
+                                </div>
+                            </td>
+                            <td class="px-4 py-3">
+                                <a href="payment_receipt.php?id=<?php echo $payment['payment_id']; ?>"
+                                    class="text-primary hover:text-blue-700">
+                                    <i class="fas fa-receipt"></i> Receipt
+                                </a>
+                            </td>
+                        </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
             <?php endif; ?>
         </div>
     </div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 
-<script>
-    function openModal() {
-        document.getElementById('markPaymentModal').classList.remove('hidden');
-        document.getElementById('markPaymentModal').classList.add('flex');
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+
+    <script>
+    function openManualPaymentModal() {
+        document.getElementById('manualPaymentModal').classList.remove('hidden');
+        document.getElementById('manualPaymentModal').classList.add('flex');
     }
-    
-    function closeModal() {
-        document.getElementById('markPaymentModal').classList.add('hidden');
-        document.getElementById('markPaymentModal').classList.remove('flex');
+
+    function closeManualPaymentModal() {
+        document.getElementById('manualPaymentModal').classList.add('hidden');
+        document.getElementById('manualPaymentModal').classList.remove('flex');
     }
-    
+
     // Close modal when clicking outside
-    document.getElementById('markPaymentModal').addEventListener('click', function(e) {
+    document.getElementById('manualPaymentModal').addEventListener('click', function(e) {
         if (e.target === this) {
-            closeModal();
+            closeManualPaymentModal();
         }
     });
-    
+
     // Export payment history to PDF
     function exportPaymentHistory() {
         // Get the payment history table
@@ -325,20 +456,20 @@ $paymentHistoryMonths = count($paymentMonths);
             alert('No payment history to export');
             return;
         }
-        
+
         // Create a new jsPDF instance
         const doc = new jspdf.jsPDF();
-        
+
         // Set title
         doc.setFontSize(18);
         doc.text('Payment History', 14, 22);
         doc.setFontSize(11);
         doc.text('Generated on: ' + new Date().toLocaleDateString(), 14, 30);
-        
+
         // Extract table data (excluding the Actions column)
         const tableData = [];
         const headers = [];
-        
+
         // Get headers (excluding Actions column)
         const headerCells = table.querySelectorAll('thead th');
         headerCells.forEach((cell, index) => {
@@ -347,7 +478,7 @@ $paymentHistoryMonths = count($paymentMonths);
             }
         });
         tableData.push(headers);
-        
+
         // Get rows
         const rows = table.querySelectorAll('tbody tr');
         rows.forEach(row => {
@@ -362,7 +493,7 @@ $paymentHistoryMonths = count($paymentMonths);
             });
             tableData.push(rowData);
         });
-        
+
         // Add table to PDF
         doc.autoTable({
             head: [tableData[0]],
@@ -378,11 +509,42 @@ $paymentHistoryMonths = count($paymentMonths);
                 textColor: 255
             }
         });
-        
+
         // Save the PDF
         doc.save('payment_history.pdf');
     }
-</script>
+
+    // Show loading state for PayPal payments
+    document.querySelector('form[action="process_paypal_payment.php"]').addEventListener('submit', function() {
+        const button = this.querySelector('button[type="submit"]');
+        button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Processing...';
+        button.disabled = true;
+    });
+
+    // Auto-refresh payment status (for pending payments)
+    function checkPendingPayments() {
+        const pendingPayments = document.querySelectorAll('.bg-yellow-100');
+        if (pendingPayments.length > 0) {
+            // Check every 30 seconds for payment status updates
+            setTimeout(() => {
+                fetch('check_payment_status.php')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.updated) {
+                            location.reload();
+                        }
+                    })
+                    .catch(error => console.log('Payment status check failed:', error));
+
+                checkPendingPayments(); // Continue checking
+            }, 30000);
+        }
+    }
+
+    // Start checking for pending payments
+    checkPendingPayments();
+    </script>
 
 </body>
+
 </html>

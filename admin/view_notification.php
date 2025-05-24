@@ -133,6 +133,7 @@ if ($notification['type'] === 'payment') {
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -140,22 +141,23 @@ if ($notification['type'] === 'payment') {
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#1a56db',
-                        secondary: '#7e3af2',
-                        success: '#0ea5e9',
-                    }
+    tailwind.config = {
+        theme: {
+            extend: {
+                colors: {
+                    primary: '#1a56db',
+                    secondary: '#7e3af2',
+                    success: '#0ea5e9',
                 }
             }
         }
+    }
     </script>
 </head>
+
 <body class="bg-gray-50">
     <!-- Sidebar -->
-    <?php include 'admin_sidebar.php'; ?>  
+    <?php include 'admin_sidebar.php'; ?>
 
     <!-- Main Content -->
     <div class="ml-64 p-8">
@@ -172,21 +174,21 @@ if ($notification['type'] === 'payment') {
 
         <!-- Success/Error Messages -->
         <?php if (isset($_SESSION['success'])): ?>
-            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6">
-                <?php 
+        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6">
+            <?php 
                 echo $_SESSION['success']; 
                 unset($_SESSION['success']);
                 ?>
-            </div>
+        </div>
         <?php endif; ?>
 
         <?php if (isset($_SESSION['error'])): ?>
-            <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
-                <?php 
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+            <?php 
                 echo $_SESSION['error']; 
                 unset($_SESSION['error']);
                 ?>
-            </div>
+        </div>
         <?php endif; ?>
 
         <!-- Notification Details -->
@@ -195,25 +197,26 @@ if ($notification['type'] === 'payment') {
                 <div class="flex items-start">
                     <div class="flex-shrink-0 pt-1">
                         <?php if ($notification['type'] === 'payment'): ?>
-                            <div class="p-3 rounded-full bg-green-100">
-                                <i class="fas fa-money-bill-wave text-green-500 text-xl"></i>
-                            </div>
+                        <div class="p-3 rounded-full bg-green-100">
+                            <i class="fas fa-money-bill-wave text-green-500 text-xl"></i>
+                        </div>
                         <?php elseif ($notification['type'] === 'maintenance'): ?>
-                            <div class="p-3 rounded-full bg-yellow-100">
-                                <i class="fas fa-tools text-yellow-500 text-xl"></i>
-                            </div>
+                        <div class="p-3 rounded-full bg-yellow-100">
+                            <i class="fas fa-tools text-yellow-500 text-xl"></i>
+                        </div>
                         <?php elseif ($notification['type'] === 'lease'): ?>
-                            <div class="p-3 rounded-full bg-blue-100">
-                                <i class="fas fa-file-contract text-blue-500 text-xl"></i>
-                            </div>
+                        <div class="p-3 rounded-full bg-blue-100">
+                            <i class="fas fa-file-contract text-blue-500 text-xl"></i>
+                        </div>
                         <?php else: ?>
-                            <div class="p-3 rounded-full bg-gray-100">
-                                <i class="fas fa-bell text-gray-500 text-xl"></i>
-                            </div>
+                        <div class="p-3 rounded-full bg-gray-100">
+                            <i class="fas fa-bell text-gray-500 text-xl"></i>
+                        </div>
                         <?php endif; ?>
                     </div>
                     <div class="ml-5 flex-1">
-                        <h3 class="text-xl font-semibold text-gray-900"><?php echo htmlspecialchars($notification['title']); ?></h3>
+                        <h3 class="text-xl font-semibold text-gray-900">
+                            <?php echo htmlspecialchars($notification['title']); ?></h3>
                         <div class="flex items-center mt-1 mb-3">
                             <span class="px-2 py-1 text-xs font-medium rounded-full 
                                 <?php 
@@ -242,19 +245,23 @@ if ($notification['type'] === 'payment') {
                         <div class="text-gray-700 mb-4">
                             <?php echo nl2br(htmlspecialchars($notification['message'])); ?>
                         </div>
-                        
+
                         <!-- Action Buttons -->
                         <div class="flex mt-6">
                             <?php if ($notification['is_read']): ?>
-                                <a href="handle_notification.php?id=<?php echo $notification['notification_id']; ?>&action=unread" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 mr-3">
-                                    <i class="fas fa-envelope mr-2"></i>Mark as Unread
-                                </a>
+                            <a href="handle_notification.php?id=<?php echo $notification['notification_id']; ?>&action=unread"
+                                class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 mr-3">
+                                <i class="fas fa-envelope mr-2"></i>Mark as Unread
+                            </a>
                             <?php else: ?>
-                                <a href="handle_notification.php?id=<?php echo $notification['notification_id']; ?>&action=read" class="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 mr-3">
-                                    <i class="fas fa-check mr-2"></i>Mark as Read
-                                </a>
+                            <a href="handle_notification.php?id=<?php echo $notification['notification_id']; ?>&action=read"
+                                class="px-4 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 mr-3">
+                                <i class="fas fa-check mr-2"></i>Mark as Read
+                            </a>
                             <?php endif; ?>
-                            <a href="handle_notification.php?id=<?php echo $notification['notification_id']; ?>&action=delete" class="px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200" onclick="return confirm('Are you sure you want to delete this notification?')">
+                            <a href="handle_notification.php?id=<?php echo $notification['notification_id']; ?>&action=delete"
+                                class="px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200"
+                                onclick="return confirm('Are you sure you want to delete this notification?')">
                                 <i class="fas fa-trash-alt mr-2"></i>Delete
                             </a>
                         </div>
@@ -265,68 +272,75 @@ if ($notification['type'] === 'payment') {
 
         <!-- Related Content -->
         <?php if ($relatedContent): ?>
-            <div class="bg-white rounded-xl shadow-md overflow-hidden">
-                <div class="px-6 py-4 bg-gray-50 border-b">
-                    <h3 class="text-lg font-semibold">Related Information</h3>
-                </div>
-                
-                <?php if ($notification['type'] === 'payment'): ?>
-                    <!-- Payment Details -->
-                    <div class="p-6">
-                        <h4 class="text-md font-medium mb-4">Payment Details</h4>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <p class="text-sm text-gray-500">Amount</p>
-                                <p class="text-lg font-semibold"><?php echo formatCurrency($relatedContent['amount']); ?></p>
-                            </div>
-                            <div>
-                                <p class="text-sm text-gray-500">Date</p>
-                                <p class="text-lg"><?php echo date('F j, Y', strtotime($relatedContent['payment_date'])); ?></p>
-                            </div>
-                            <div>
-                                <p class="text-sm text-gray-500">Property</p>
-                                <p class="text-lg"><?php echo htmlspecialchars($relatedContent['property_name']); ?></p>
-                            </div>
-                            <div>
-                                <p class="text-sm text-gray-500">Tenant</p>
-                                <p class="text-lg"><?php echo htmlspecialchars($relatedContent['first_name'] . ' ' . $relatedContent['last_name']); ?></p>
-                            </div>
-                            <div>
-                                <p class="text-sm text-gray-500">Payment Method</p>
-                                <p class="text-lg"><?php echo ucfirst(str_replace('_', ' ', $relatedContent['payment_method'])); ?></p>
-                            </div>
-                            <div>
-                                <p class="text-sm text-gray-500">Payment Type</p>
-                                <p class="text-lg"><?php echo ucfirst(str_replace('_', ' ', $relatedContent['payment_type'])); ?></p>
-                            </div>
-                        </div>
-                        
-                        <?php if (!empty($relatedContent['notes'])): ?>
-                            <div class="mt-4">
-                                <p class="text-sm text-gray-500">Notes</p>
-                                <p class="text-lg"><?php echo nl2br(htmlspecialchars($relatedContent['notes'])); ?></p>
-                            </div>
-                        <?php endif; ?>
-                        
-                        <div class="mt-6">
-                            <a href="payment_details.php?id=<?php echo $relatedContent['payment_id']; ?>" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-700">
-                                <i class="fas fa-eye mr-2"></i>View Full Payment Details
-                            </a>
-                        </div>
+        <div class="bg-white rounded-xl shadow-md overflow-hidden">
+            <div class="px-6 py-4 bg-gray-50 border-b">
+                <h3 class="text-lg font-semibold">Related Information</h3>
+            </div>
+
+            <?php if ($notification['type'] === 'payment'): ?>
+            <!-- Payment Details -->
+            <div class="p-6">
+                <h4 class="text-md font-medium mb-4">Payment Details</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-sm text-gray-500">Amount</p>
+                        <p class="text-lg font-semibold" data-currency-value="<?= $relatedContent['amount']; ?>"
+                            data-currency-original="USD">
+                            <?php echo formatCurrency($relatedContent['amount']); ?> </p>
                     </div>
-                <?php elseif ($notification['type'] === 'maintenance'): ?>
-                    <!-- Maintenance Request Details -->
-                    <div class="p-6">
-                        <h4 class="text-md font-medium mb-4">Maintenance Request Details</h4>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <p class="text-sm text-gray-500">Title</p>
-                                <p class="text-lg font-semibold"><?php echo htmlspecialchars($relatedContent['title']); ?></p>
-                            </div>
-                            <div>
-                                <p class="text-sm text-gray-500">Status</p>
-                                <p class="text-lg">
-                                    <span class="px-2 py-1 text-xs font-medium rounded-full 
+                    <div>
+                        <p class="text-sm text-gray-500">Date</p>
+                        <p class="text-lg"><?php echo date('F j, Y', strtotime($relatedContent['payment_date'])); ?></p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Property</p>
+                        <p class="text-lg"><?php echo htmlspecialchars($relatedContent['property_name']); ?></p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Tenant</p>
+                        <p class="text-lg">
+                            <?php echo htmlspecialchars($relatedContent['first_name'] . ' ' . $relatedContent['last_name']); ?>
+                        </p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Payment Method</p>
+                        <p class="text-lg">
+                            <?php echo ucfirst(str_replace('_', ' ', $relatedContent['payment_method'])); ?></p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Payment Type</p>
+                        <p class="text-lg">
+                            <?php echo ucfirst(str_replace('_', ' ', $relatedContent['payment_type'])); ?></p>
+                    </div>
+                </div>
+
+                <?php if (!empty($relatedContent['notes'])): ?>
+                <div class="mt-4">
+                    <p class="text-sm text-gray-500">Notes</p>
+                    <p class="text-lg"><?php echo nl2br(htmlspecialchars($relatedContent['notes'])); ?></p>
+                </div>
+                <?php endif; ?>
+
+                <div class="mt-6">
+                    <a href="payment_details.php?id=<?php echo $relatedContent['payment_id']; ?>"
+                        class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-700">
+                        <i class="fas fa-eye mr-2"></i>View Full Payment Details
+                    </a>
+                </div>
+            </div>
+            <?php elseif ($notification['type'] === 'maintenance'): ?>
+            <!-- Maintenance Request Details -->
+            <div class="p-6">
+                <h4 class="text-md font-medium mb-4">Maintenance Request Details</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-sm text-gray-500">Title</p>
+                        <p class="text-lg font-semibold"><?php echo htmlspecialchars($relatedContent['title']); ?></p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Status</p>
+                        <p class="text-lg">
+                            <span class="px-2 py-1 text-xs font-medium rounded-full 
                                         <?php 
                                         switch ($relatedContent['status']) {
                                             case 'pending':
@@ -346,22 +360,24 @@ if ($notification['type'] === 'payment') {
                                                 break;
                                         }
                                         ?>">
-                                        <?php echo ucfirst(str_replace('_', ' ', $relatedContent['status'])); ?>
-                                    </span>
-                                </p>
-                            </div>
-                            <div>
-                                <p class="text-sm text-gray-500">Property</p>
-                                <p class="text-lg"><?php echo htmlspecialchars($relatedContent['property_name']); ?></p>
-                            </div>
-                            <div>
-                                <p class="text-sm text-gray-500">Reported By</p>
-                                <p class="text-lg"><?php echo htmlspecialchars($relatedContent['first_name'] . ' ' . $relatedContent['last_name']); ?></p>
-                            </div>
-                            <div>
-                                <p class="text-sm text-gray-500">Priority</p>
-                                <p class="text-lg">
-                                    <span class="px-2 py-1 text-xs font-medium rounded-full 
+                                <?php echo ucfirst(str_replace('_', ' ', $relatedContent['status'])); ?>
+                            </span>
+                        </p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Property</p>
+                        <p class="text-lg"><?php echo htmlspecialchars($relatedContent['property_name']); ?></p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Reported By</p>
+                        <p class="text-lg">
+                            <?php echo htmlspecialchars($relatedContent['first_name'] . ' ' . $relatedContent['last_name']); ?>
+                        </p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Priority</p>
+                        <p class="text-lg">
+                            <span class="px-2 py-1 text-xs font-medium rounded-full 
                                         <?php 
                                         switch ($relatedContent['priority']) {
                                             case 'low':
@@ -381,56 +397,60 @@ if ($notification['type'] === 'payment') {
                                                 break;
                                         }
                                         ?>">
-                                        <?php echo ucfirst($relatedContent['priority']); ?>
-                                    </span>
-                                </p>
-                            </div>
-                            <div>
-                                <p class="text-sm text-gray-500">Date Reported</p>
-                                <p class="text-lg"><?php echo date('F j, Y', strtotime($relatedContent['created_at'])); ?></p>
-                            </div>
-                        </div>
-                        
-                        <div class="mt-4">
-                            <p class="text-sm text-gray-500">Description</p>
-                            <p class="text-lg"><?php echo nl2br(htmlspecialchars($relatedContent['description'])); ?></p>
-                        </div>
-                        
-                        <div class="mt-6">
-                            <a href="maintenance_details.php?id=<?php echo $relatedContent['request_id']; ?>" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-700">
-                                <i class="fas fa-eye mr-2"></i>View Full Maintenance Details
-                            </a>
-                        </div>
+                                <?php echo ucfirst($relatedContent['priority']); ?>
+                            </span>
+                        </p>
                     </div>
-                <?php elseif ($notification['type'] === 'lease'): ?>
-                    <!-- Lease Details -->
-                    <div class="p-6">
-                        <h4 class="text-md font-medium mb-4">Lease Details</h4>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <p class="text-sm text-gray-500">Property</p>
-                                <p class="text-lg"><?php echo htmlspecialchars($relatedContent['property_name']); ?></p>
-                            </div>
-                            <div>
-                                <p class="text-sm text-gray-500">Tenant</p>
-                                <p class="text-lg"><?php echo htmlspecialchars($relatedContent['first_name'] . ' ' . $relatedContent['last_name']); ?></p>
-                            </div>
-                            <div>
-                                <p class="text-sm text-gray-500">Start Date</p>
-                                <p class="text-lg"><?php echo date('F j, Y', strtotime($relatedContent['start_date'])); ?></p>
-                            </div>
-                            <div>
-                                <p class="text-sm text-gray-500">End Date</p>
-                                <p class="text-lg"><?php echo date('F j, Y', strtotime($relatedContent['end_date'])); ?></p>
-                            </div>
-                            <div>
-                                <p class="text-sm text-gray-500">Monthly Rent</p>
-                                <p class="text-lg font-semibold"><?php echo formatCurrency($relatedContent['monthly_rent']); ?></p>
-                            </div>
-                            <div>
-                                <p class="text-sm text-gray-500">Status</p>
-                                <p class="text-lg">
-                                    <span class="px-2 py-1 text-xs font-medium rounded-full 
+                    <div>
+                        <p class="text-sm text-gray-500">Date Reported</p>
+                        <p class="text-lg"><?php echo date('F j, Y', strtotime($relatedContent['created_at'])); ?></p>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <p class="text-sm text-gray-500">Description</p>
+                    <p class="text-lg"><?php echo nl2br(htmlspecialchars($relatedContent['description'])); ?></p>
+                </div>
+
+                <div class="mt-6">
+                    <a href="maintenance_details.php?id=<?php echo $relatedContent['request_id']; ?>"
+                        class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-700">
+                        <i class="fas fa-eye mr-2"></i>View Full Maintenance Details
+                    </a>
+                </div>
+            </div>
+            <?php elseif ($notification['type'] === 'lease'): ?>
+            <!-- Lease Details -->
+            <div class="p-6">
+                <h4 class="text-md font-medium mb-4">Lease Details</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-sm text-gray-500">Property</p>
+                        <p class="text-lg"><?php echo htmlspecialchars($relatedContent['property_name']); ?></p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Tenant</p>
+                        <p class="text-lg">
+                            <?php echo htmlspecialchars($relatedContent['first_name'] . ' ' . $relatedContent['last_name']); ?>
+                        </p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Start Date</p>
+                        <p class="text-lg"><?php echo date('F j, Y', strtotime($relatedContent['start_date'])); ?></p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">End Date</p>
+                        <p class="text-lg"><?php echo date('F j, Y', strtotime($relatedContent['end_date'])); ?></p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Monthly Rent</p>
+                        <p class="text-lg font-semibold"><?php echo formatCurrency($relatedContent['monthly_rent']); ?>
+                        </p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Status</p>
+                        <p class="text-lg">
+                            <span class="px-2 py-1 text-xs font-medium rounded-full 
                                         <?php 
                                         switch ($relatedContent['status']) {
                                             case 'active':
@@ -447,22 +467,23 @@ if ($notification['type'] === 'payment') {
                                                 break;
                                         }
                                         ?>">
-                                        <?php echo ucfirst($relatedContent['status']); ?>
-                                    </span>
-                                </p>
-                            </div>
-                        </div>
-                        
-                        <div class="mt-6">
-                            <a href="lease_details.php?id=<?php echo $relatedContent['lease_id']; ?>" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-700">
-                                <i class="fas fa-eye mr-2"></i>View Full Lease Details
-                            </a>
-                        </div>
+                                <?php echo ucfirst($relatedContent['status']); ?>
+                            </span>
+                        </p>
                     </div>
-                <?php endif; ?>
+                </div>
+
+                <div class="mt-6">
+                    <a href="lease_details.php?id=<?php echo $relatedContent['lease_id']; ?>"
+                        class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-blue-700">
+                        <i class="fas fa-eye mr-2"></i>View Full Lease Details
+                    </a>
+                </div>
             </div>
+            <?php endif; ?>
+        </div>
         <?php endif; ?>
     </div>
 </body>
-</html>
 
+</html>

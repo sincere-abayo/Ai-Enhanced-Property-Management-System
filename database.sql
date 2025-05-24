@@ -319,6 +319,8 @@ CREATE TABLE IF NOT EXISTS message_delivery_logs (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (message_id) REFERENCES messages(message_id) ON DELETE CASCADE
 );
+
+
 -- new tables 
 -- Property images table
 CREATE TABLE IF NOT EXISTS property_images (
@@ -341,4 +343,31 @@ CREATE TABLE IF NOT EXISTS inquiries (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     status ENUM('new', 'in_progress', 'responded', 'closed') DEFAULT 'new',
     FOREIGN KEY (property_id) REFERENCES properties(property_id) ON DELETE SET NULL
+);
+
+-- Add payment gateway fields to payments table
+ALTER TABLE payments 
+ADD COLUMN gateway_transaction_id VARCHAR(255) NULL,
+ADD COLUMN gateway_name ENUM('paypal', 'manual') DEFAULT 'manual',
+ADD COLUMN gateway_status ENUM('pending', 'successful', 'failed', 'cancelled') DEFAULT 'successful',
+ADD COLUMN gateway_response JSON NULL;
+
+-- Update payment_method enum to include mobile_money
+ALTER TABLE payments 
+MODIFY COLUMN payment_method ENUM('cash', 'check', 'bank_transfer', 'credit_card', 'mobile_money', 'paypal', 'other') NOT NULL;
+
+-- Create payment transactions table for tracking
+CREATE TABLE IF NOT EXISTS payment_transactions (
+    transaction_id INT AUTO_INCREMENT PRIMARY KEY,
+    lease_id INT NOT NULL,
+    amount DECIMAL(10,2) NOT NULL,
+    currency VARCHAR(3) DEFAULT 'USD',
+    payment_method VARCHAR(50) NOT NULL,
+    gateway_name VARCHAR(50) NOT NULL,
+    gateway_transaction_id VARCHAR(255),
+    status ENUM('pending', 'successful', 'failed', 'cancelled') DEFAULT 'pending',
+    gateway_response JSON,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (lease_id) REFERENCES leases(lease_id) ON DELETE CASCADE
 );
