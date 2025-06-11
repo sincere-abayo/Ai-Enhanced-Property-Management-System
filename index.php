@@ -199,7 +199,12 @@ $propertyTypes = getPropertyTypes();
         background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-1.2.1&auto=format&fit=crop&w=1500&q=80');
         background-size: cover;
         background-position: center;
-        height: 30vh;
+        height: 70vh;
+    }
+    @media (max-width: 640px) {
+      .hero-section {
+        height: 20vh;
+      }
     }
     </style>
 </head>
@@ -207,11 +212,11 @@ $propertyTypes = getPropertyTypes();
 <body class="bg-gray-50">
     <!-- Navigation -->
     <nav class="bg-white shadow-md">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
             <div class="flex justify-between h-16">
                 <div class="flex">
                     <div class="flex-shrink-0 flex items-center">
-                        <h1 class="text-2xl font-bold text-primary">PropertyPro</h1>
+                        <h1 class="text-xl sm:text-2xl font-bold text-primary">PropertyPro</h1>
                     </div>
                     <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
                         <a href="#"
@@ -229,13 +234,11 @@ $propertyTypes = getPropertyTypes();
                     </div>
                 </div>
                 <div class="hidden sm:ml-6 sm:flex sm:items-center">
-
                     <a href="login.php"
                         class="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium">
                         Login
                     </a>
                 </div>
-
                 <div class="-mr-2 flex items-center sm:hidden">
                     <button type="button"
                         class="mobile-menu-button inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary">
@@ -245,9 +248,8 @@ $propertyTypes = getPropertyTypes();
                 </div>
             </div>
         </div>
-
         <!-- Mobile menu, show/hide based on menu state -->
-        <div class="sm:hidden hidden mobile-menu">
+        <div class="sm:hidden hidden mobile-menu bg-white border-t border-gray-200">
             <div class="pt-2 pb-3 space-y-1">
                 <a href="#" class="bg-primary text-white block pl-3 pr-4 py-2 text-base font-medium">
                     Home
@@ -264,18 +266,17 @@ $propertyTypes = getPropertyTypes();
                     class="text-gray-500 hover:bg-gray-50 hover:text-gray-700 block pl-3 pr-4 py-2 text-base font-medium">
                     Login
                 </a>
-
             </div>
         </div>
     </nav>
 
     <!-- Hero Section -->
-    <section class="hero-section flex items-center justify-center">
-        <div class="text-center text-white px-4">
-            <h1 class="text-4xl md:text-5xl font-bold mb-4">Find Your Perfect Home</h1>
-            <p class="text-xl md:text-2xl mb-8">Browse our selection of premium properties available for rent</p>
+    <section class="hero-section flex items-center justify-center px-2 sm:px-4">
+        <div class="text-center text-white px-2 sm:px-4">
+            <h1 class="text-2xl sm:text-4xl md:text-5xl font-bold mb-2 sm:mb-4">Find Your Perfect Home</h1>
+            <p class="text-base sm:text-xl md:text-2xl mb-4 sm:mb-8">Browse our selection of premium properties available for rent</p>
             <a href="#properties"
-                class="bg-primary text-white px-6 py-3 rounded-lg text-lg font-medium hover:bg-blue-700 transition duration-300">
+                class="bg-primary text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg text-base sm:text-lg font-medium hover:bg-blue-700 transition duration-300">
                 View Properties
             </a>
         </div>
@@ -283,13 +284,13 @@ $propertyTypes = getPropertyTypes();
 
     <!-- Property Search Section -->
     <section class="py-12 bg-white" id="properties">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 class="text-3xl font-bold text-gray-900 mb-8 text-center">Available Properties</h2>
+        <div class="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
+            <h2 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-6 sm:mb-8 text-center">Available Properties</h2>
 
             <!-- Search and Filters -->
-            <div class="bg-gray-100 rounded-xl p-6 mb-8">
+            <div class="bg-gray-100 rounded-xl p-4 sm:p-6 mb-6 sm:mb-8">
                 <form method="GET" action="#properties">
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div class="grid grid-cols-1 gap-4 md:grid-cols-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
                             <select name="status"
@@ -353,7 +354,7 @@ $propertyTypes = getPropertyTypes();
             </div>
 
             <!-- Properties Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
                 <?php if (empty($properties)): ?>
                 <div class="col-span-3 text-center py-8">
                     <p class="text-gray-500">No properties found matching your criteria.</p>

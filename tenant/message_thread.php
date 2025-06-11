@@ -303,19 +303,27 @@ function formatMessageTime($timestamp) {
     <?php include 'tenant_sidebar.php'; ?>
 
     <!-- Main Content -->
-    <div class="ml-64 p-8">
+    <div class="sm:ml-64 p-4 sm:p-8 transition-all duration-200">
         <!-- Header with Back Button -->
-        <div class="flex items-center mb-8">
-            <a href="messages.php" class="mr-4 text-gray-600 hover:text-gray-900">
-                <i class="fas fa-arrow-left"></i>
-            </a>
-            <div>
-                <h2 class="text-2xl font-bold text-gray-800"><?php echo htmlspecialchars($thread['subject']); ?></h2>
-                <p class="text-gray-600">
-                    Conversation with
-                    <?php echo htmlspecialchars($otherParticipant['first_name'] . ' ' . $otherParticipant['last_name']); ?>
-                </p>
+        <div class="flex flex-col sm:flex-row items-start sm:items-center mb-6 sm:mb-8">
+            <div class="flex items-center mb-2 sm:mb-0">
+                <a href="messages.php" class="mr-4 text-gray-600 hover:text-gray-900">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-800"><?php echo htmlspecialchars($thread['subject']); ?></h2>
+                    <p class="text-gray-600">
+                        Conversation with
+                        <?php echo htmlspecialchars($otherParticipant['first_name'] . ' ' . $otherParticipant['last_name']); ?>
+                    </p>
+                </div>
             </div>
+            <!-- Hamburger for mobile -->
+            <button id="openSidebarBtn" class="sm:hidden inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-primary focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary mb-2" aria-label="Open sidebar" onclick="document.getElementById('tenantSidebar').classList.remove('-translate-x-full'); document.getElementById('sidebarBackdrop').classList.remove('hidden');">
+                <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+            </button>
         </div>
 
         <!-- Success/Warning/Error Messages -->

@@ -137,13 +137,20 @@ $pageTitle = "Chatbot Management";
         }
     </script>
 </head>
-<body class="bg-gray-50"></body>
+<body class="bg-gray-50">
 <?php
 include_once 'admin_sidebar.php';
 ?>
- <div class="ml-64 p-8"></div>
-<div class="container mx-auto px-4 py-8">
-    <h1 class="text-3xl font-bold text-gray-800 mb-6">Chatbot Management</h1>
+<div class="sm:ml-64 p-4 sm:p-8 transition-all duration-200">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-8">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6 sm:mb-0">Chatbot Management</h1>
+        <!-- Hamburger for mobile -->
+        <button id="openSidebarBtn" class="sm:hidden inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-primary focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary mb-2" aria-label="Open sidebar" onclick="document.getElementById('adminSidebar').classList.remove('-translate-x-full'); document.getElementById('sidebarBackdrop').classList.remove('hidden');">
+            <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+        </button>
+    </div>
     
     <?php if (isset($_SESSION['success'])): ?>
         <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
@@ -468,7 +475,7 @@ include_once 'admin_sidebar.php';
         </div>
     </div>
 </div>
-                    </div>
+
 <script>
 // Tab functionality
 document.addEventListener('DOMContentLoaded', function() {

@@ -4,11 +4,17 @@ require_once '../includes/currency.php';
 $current_page = basename($_SERVER['PHP_SELF']);
 ?>
 
-<div class="fixed inset-y-0 left-0 bg-white shadow-lg max-h-screen w-64">
+<div id="tenantSidebar" class="fixed inset-y-0 left-0 bg-white shadow-lg max-h-screen w-64 z-40 transform -translate-x-full sm:translate-x-0 transition-transform duration-200 ease-in-out">
     <div class="flex flex-col justify-between h-full">
         <div class="flex-grow">
-            <div class="px-4 py-6 text-center border-b">
+            <div class="px-4 py-6 text-center border-b flex justify-between items-center">
                 <h1 class="text-xl font-bold leading-none"><span class="text-primary">Tenant</span> Portal</h1>
+                <!-- Close button for mobile -->
+                <button id="closeSidebarBtn" class="sm:hidden text-gray-700 hover:text-primary focus:outline-none ml-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
             </div>
             <div class="p-4">
                 <ul class="space-y-1">
@@ -98,7 +104,28 @@ $current_page = basename($_SERVER['PHP_SELF']);
         </div>
     </div>
 </div>
-<?php include_once '../includes/chatbot_widget.php'; ?>
+<!-- Backdrop for mobile overlay -->
+<div id="sidebarBackdrop" class="fixed inset-0 bg-black bg-opacity-40 z-30 hidden sm:hidden"></div>
+<script>
+    // Sidebar toggle for mobile
+    document.addEventListener('DOMContentLoaded', function() {
+        const sidebar = document.getElementById('tenantSidebar');
+        const openBtn = document.getElementById('openSidebarBtn');
+        const closeBtn = document.getElementById('closeSidebarBtn');
+        const backdrop = document.getElementById('sidebarBackdrop');
+        function openSidebar() {
+            sidebar.classList.remove('-translate-x-full');
+            backdrop.classList.remove('hidden');
+        }
+        function closeSidebar() {
+            sidebar.classList.add('-translate-x-full');
+            backdrop.classList.add('hidden');
+        }
+        if (openBtn) openBtn.addEventListener('click', openSidebar);
+        if (closeBtn) closeBtn.addEventListener('click', closeSidebar);
+        if (backdrop) backdrop.addEventListener('click', closeSidebar);
+    });
+</script>
 <script src="../js/currency.js"></script>
 <script>
     // Initialize currency display when the page loads

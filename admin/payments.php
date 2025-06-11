@@ -141,23 +141,20 @@ foreach ($payments as $payment) {
     <?php include 'admin_sidebar.php'; ?>
 
     <!-- Main Content -->
-    <div class="ml-64 p-8">
+    <div class="sm:ml-64 p-4 sm:p-8 transition-all duration-200">
         <!-- Header -->
-        <div class="flex justify-between items-center mb-8">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-8">
             <div>
                 <h2 class="text-2xl font-bold text-gray-800">Payments</h2>
-                <p class="text-gray-600">Manage and track all payment records</p>
+                <p class="text-gray-600">View and manage payment records</p>
             </div>
-            <div class="flex space-x-4">
-                <a href="#" onclick="toggleFilters()" class="bg-white text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 border border-gray-300">
-                    <i class="fas fa-filter mr-2"></i>Filters
-                </a>
-                <button onclick="exportPayments()" class="bg-white text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 border border-gray-300">
-                    <i class="fas fa-download mr-2"></i>Export
+            <div class="flex items-center space-x-4 mt-4 sm:mt-0 w-full sm:w-auto justify-between">
+                <button class="sm:hidden text-gray-700 hover:text-primary focus:outline-none mr-4" aria-label="Open sidebar" onclick="openSidebar()">
+                    <i class="fas fa-bars text-2xl"></i>
                 </button>
-                <a href="record_payment.php" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                <button onclick="openRecordPaymentModal()" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-blue-700">
                     <i class="fas fa-plus mr-2"></i>Record Payment
-                </a>
+                </button>
             </div>
         </div>
 
@@ -257,7 +254,7 @@ foreach ($payments as $payment) {
         </div>
 
         <!-- Payments Table -->
-        <div class="bg-white rounded-xl shadow-md overflow-hidden">
+        <div class="bg-white rounded-xl shadow-md overflow-x-auto">
             <?php if (empty($payments)): ?>
                 <div class="p-6 text-center">
                     <p class="text-gray-500">No payment records found</p>

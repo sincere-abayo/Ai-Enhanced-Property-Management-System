@@ -84,9 +84,9 @@ $unreadCount = $stmt->fetch()['unread_count'];
     <?php include 'admin_sidebar.php'; ?>  
 
     <!-- Main Content -->
-    <div class="ml-64 p-8">
+    <div class="sm:ml-64 p-4 sm:p-8 transition-all duration-200">
         <!-- Header -->
-        <div class="flex justify-between items-center mb-8">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-8">
             <div>
                 <h2 class="text-2xl font-bold text-gray-800">Messages</h2>
                 <p class="text-gray-600">Communicate with your tenants</p>
@@ -94,6 +94,12 @@ $unreadCount = $stmt->fetch()['unread_count'];
             <a href="send_message.php" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-blue-700">
                 <i class="fas fa-paper-plane mr-2"></i>New Message
             </a>
+            <!-- Hamburger for mobile -->
+            <button id="openSidebarBtn" class="sm:hidden inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-primary focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary mb-2" aria-label="Open sidebar" onclick="document.getElementById('adminSidebar').classList.remove('-translate-x-full'); document.getElementById('sidebarBackdrop').classList.remove('hidden');">
+                <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+            </button>
         </div>
 
         <!-- Messages List -->

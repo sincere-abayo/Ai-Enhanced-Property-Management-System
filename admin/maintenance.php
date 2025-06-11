@@ -283,15 +283,18 @@ function formatStatus($status) {
     <?php include 'admin_sidebar.php'; ?>  
 
     <!-- Main Content -->
-    <div class="ml-64 p-8">
+    <div class="sm:ml-64 p-4 sm:p-8 transition-all duration-200">
         <!-- Header -->
-        <div class="flex justify-between items-center mb-8">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-8">
             <div>
                 <h2 class="text-2xl font-bold text-gray-800">Maintenance</h2>
                 <p class="text-gray-600">Track and manage maintenance requests</p>
             </div>
-            <button onclick="openNewRequestModal()" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-blue-700">
-                <i class="fas fa-plus mr-2"></i>New Request
+            <!-- Hamburger for mobile -->
+            <button id="openSidebarBtn" class="sm:hidden inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-primary focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary mb-2" aria-label="Open sidebar" onclick="document.getElementById('adminSidebar').classList.remove('-translate-x-full'); document.getElementById('sidebarBackdrop').classList.remove('hidden');">
+                <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
             </button>
         </div>
 
@@ -317,7 +320,7 @@ function formatStatus($status) {
         <?php endif; ?>
 
         <!-- Maintenance Summary Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <div class="bg-white rounded-xl shadow-md p-6">
                 <div class="flex items-center">
                     <div class="p-3 rounded-full bg-blue-100">
@@ -414,7 +417,7 @@ function formatStatus($status) {
         </div>
 
         <!-- Maintenance Requests Table -->
-        <div class="bg-white rounded-xl shadow-md overflow-hidden">
+        <div class="bg-white rounded-xl shadow-md overflow-x-auto">
             <?php if (empty($maintenanceRequests)): ?>
                 <div class="p-6 text-center">
                     <p class="text-gray-500">No maintenance requests found.</p>

@@ -89,15 +89,18 @@ function getIncomeSummary($userId, $startDate, $endDate, $propertyId = 0) {
     <!-- Sidebar -->
     <?php include 'admin_sidebar.php'; ?>  
     <!-- Main Content -->
-    <div class="ml-64 p-8">
+    <div class="sm:ml-64 p-4 sm:p-8 transition-all duration-200">
         <!-- Header -->
-        <div class="flex justify-between items-center mb-8">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-8">
             <div>
                 <h2 class="text-2xl font-bold text-gray-800">Welcome back, <?php echo htmlspecialchars($firstName); ?>!</h2>
                 <p class="text-gray-600">Here's what's happening with your properties today</p>
             </div>
-            <div class="flex space-x-4">
-    
+            <div class="flex items-center space-x-4 mt-4 sm:mt-0 w-full sm:w-auto justify-between">
+                <!-- Hamburger for mobile -->
+                <button class="sm:hidden text-gray-700 hover:text-primary focus:outline-none mr-4" aria-label="Open sidebar" onclick="openSidebar()">
+                    <i class="fas fa-bars text-2xl"></i>
+                </button>
               <div>
                 <div class="relative ml-3">
                     <button id="notificationButton" class="relative p-1 text-gray-600 hover:text-gray-900 focus:outline-none">
@@ -185,7 +188,7 @@ function getIncomeSummary($userId, $startDate, $endDate, $propertyId = 0) {
         </div>
 
         <!-- Stats Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
             <div class="bg-white rounded-xl shadow-md p-6">
                 <div class="flex items-center">
                     <div class="p-3 rounded-full bg-blue-100">

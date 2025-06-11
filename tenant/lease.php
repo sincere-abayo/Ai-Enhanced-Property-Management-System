@@ -104,20 +104,19 @@ function formatDate($date) {
     <?php include 'tenant_sidebar.php'; ?>
 
     <!-- Main Content -->
-    <div class="ml-64 p-8">
+    <div class="sm:ml-64 p-4 sm:p-8 transition-all duration-200">
         <!-- Header -->
-        <div class="flex justify-between items-center mb-8">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-8">
             <div>
                 <h2 class="text-2xl font-bold text-gray-800">My Lease</h2>
                 <p class="text-gray-600">View your lease details and payment schedule</p>
             </div>
-            <?php if ($activeLease): ?>
-            <!-- <div class="flex space-x-4">
-                <button onclick="window.print()" class="bg-white text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 border border-gray-300">
-                    <i class="fas fa-print mr-2"></i>Print Lease
-                </button>
-            </div> -->
-            <?php endif; ?>
+            <!-- Hamburger for mobile -->
+            <button id="openSidebarBtn" class="sm:hidden inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-primary focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary mb-2" aria-label="Open sidebar" onclick="document.getElementById('tenantSidebar').classList.remove('-translate-x-full'); document.getElementById('sidebarBackdrop').classList.remove('hidden');">
+                <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+            </button>
         </div>
 
         <?php if (empty($leases)): ?>
@@ -308,64 +307,62 @@ function formatDate($date) {
             </div>
             
             <!-- Past Lease List -->
-            <div class="bg-white rounded-xl shadow-md overflow-hidden">
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-50">
+            <div class="bg-white rounded-xl shadow-md overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Property</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lease Period</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Monthly Rent</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <?php foreach ($leases as $lease): ?>
                             <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Property</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lease Period</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Monthly Rent</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm font-medium text-gray-900"><?php echo htmlspecialchars($lease['property_name']); ?></div>
+                                    <div class="text-xs text-gray-500">
+                                        <?php 
+                                        if ($lease['unit_number']) {
+                                            echo 'Unit ' . htmlspecialchars($lease['unit_number']);
+                                        } else {
+                                            echo htmlspecialchars($lease['property_type']);
+                                        }
+                                        ?>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm text-gray-900"><?php echo formatDate($lease['start_date']); ?> - <?php echo formatDate($lease['end_date']); ?></div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-sm font-medium" data-currency-value="<?= $lease['monthly_rent'] ?>" data-currency-original="USD"><?php echo formatCurrency($lease['monthly_rent']); ?></div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <?php if ($lease['status'] == 'active'): ?>
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                                            Active
+                                        </span>
+                                    <?php elseif ($lease['status'] == 'expired'): ?>
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+                                            Expired
+                                        </span>
+                                    <?php else: ?>
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                                            Terminated
+                                        </span>
+                                    <?php endif; ?>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <a href="lease_details.php?id=<?php echo $lease['lease_id']; ?>" class="text-primary hover:text-blue-700">
+                                        View Details
+                                    </a>
+                                </td>
                             </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y divide-gray-200">
-                            <?php foreach ($leases as $lease): ?>
-                                <tr>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm font-medium text-gray-900"><?php echo htmlspecialchars($lease['property_name']); ?></div>
-                                        <div class="text-xs text-gray-500">
-                                            <?php 
-                                            if ($lease['unit_number']) {
-                                                echo 'Unit ' . htmlspecialchars($lease['unit_number']);
-                                            } else {
-                                                echo htmlspecialchars($lease['property_type']);
-                                            }
-                                            ?>
-                                        </div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm text-gray-900"><?php echo formatDate($lease['start_date']); ?> - <?php echo formatDate($lease['end_date']); ?></div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <div class="text-sm font-medium" data-currency-value="<?= $lease['monthly_rent'] ?>" data-currency-original="USD"><?php echo formatCurrency($lease['monthly_rent']); ?></div>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap">
-                                        <?php if ($lease['status'] == 'active'): ?>
-                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                                                Active
-                                            </span>
-                                        <?php elseif ($lease['status'] == 'expired'): ?>
-                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
-                                                Expired
-                                            </span>
-                                        <?php else: ?>
-                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
-                                                Terminated
-                                            </span>
-                                        <?php endif; ?>
-                                    </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                        <a href="lease_details.php?id=<?php echo $lease['lease_id']; ?>" class="text-primary hover:text-blue-700">
-                                            View Details
-                                        </a>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                </div>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
             </div>
         <?php endif; ?>
     </div>

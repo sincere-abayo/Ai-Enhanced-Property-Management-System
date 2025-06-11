@@ -5,11 +5,15 @@ require_once '../includes/currency.php';
 $current_page = basename($_SERVER['PHP_SELF']);
 ?>
 
-<div class="fixed inset-y-0 left-0 bg-white shadow-lg max-h-screen w-64">
+<div id="adminSidebar" class="fixed inset-y-0 left-0 bg-white shadow-lg max-h-screen w-64 z-40 transform -translate-x-full sm:translate-x-0 transition-transform duration-200 ease-in-out">
     <div class="flex flex-col justify-between h-full">
         <div class="flex-grow">
-            <div class="px-4 py-6 text-center border-b">
+            <div class="px-4 py-6 text-center border-b flex justify-between items-center">
                 <h1 class="text-xl font-bold leading-none"><span class="text-primary">Property</span> Landlord</h1>
+                <!-- Close button for mobile -->
+                <button id="closeSidebarBtn" class="sm:hidden text-gray-500 hover:text-primary focus:outline-none">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
             <div class="p-4">
                 <ul class="space-y-1">
@@ -111,16 +115,33 @@ $current_page = basename($_SERVER['PHP_SELF']);
         </div>
     </div>
 </div>
+<!-- Backdrop for mobile sidebar -->
+<div id="sidebarBackdrop" class="fixed inset-0 bg-black bg-opacity-40 z-30 hidden sm:hidden"></div>
 <script src="../js/currency.js"></script>
 <script>
     // Initialize currency display when the page loads
     document.addEventListener('DOMContentLoaded', function() {
         const currentCurrency = '<?php echo getUserCurrency(); ?>';
         updatePageCurrencies(currentCurrency);
-        
         // Listen for currency change events
         document.addEventListener('currencyChanged', function(e) {
             updatePageCurrencies(e.detail.currency);
         });
+        // Sidebar toggle logic
+        const sidebar = document.getElementById('adminSidebar');
+        const backdrop = document.getElementById('sidebarBackdrop');
+        const closeBtn = document.getElementById('closeSidebarBtn');
+        // Open sidebar (triggered from header, see dashboard.php)
+        window.openSidebar = function() {
+            sidebar.classList.remove('-translate-x-full');
+            backdrop.classList.remove('hidden');
+        };
+        // Close sidebar
+        function closeSidebar() {
+            sidebar.classList.add('-translate-x-full');
+            backdrop.classList.add('hidden');
+        }
+        closeBtn && closeBtn.addEventListener('click', closeSidebar);
+        backdrop && backdrop.addEventListener('click', closeSidebar);
     });
 </script>

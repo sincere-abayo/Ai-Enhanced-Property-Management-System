@@ -360,16 +360,21 @@ function getLeaseStatusClass($status) {
     <?php include 'admin_sidebar.php'; ?>
 
     <!-- Main Content -->
-    <div class="ml-64 p-8">
+    <div class="sm:ml-64 p-4 sm:p-8 transition-all duration-200">
         <!-- Header -->
-        <div class="flex justify-between items-center mb-8">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-8">
             <div>
                 <h2 class="text-2xl font-bold text-gray-800">Tenants</h2>
-                <p class="text-gray-600">Manage your tenants and their information</p>
+                <p class="text-gray-600">Manage your tenants and their leases</p>
             </div>
-            <button onclick="openAddTenantModal()" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-blue-700">
-                <i class="fas fa-plus mr-2"></i>Add Tenant
-            </button>
+            <div class="flex items-center space-x-4 mt-4 sm:mt-0 w-full sm:w-auto justify-between">
+                <button class="sm:hidden text-gray-700 hover:text-primary focus:outline-none mr-4" aria-label="Open sidebar" onclick="openSidebar()">
+                    <i class="fas fa-bars text-2xl"></i>
+                </button>
+                <button onclick="openAddTenantModal()" class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                    <i class="fas fa-plus mr-2"></i>Add Tenant
+                </button>
+            </div>
         </div>
 
         <!-- Success/Error Messages -->
@@ -445,7 +450,7 @@ function getLeaseStatusClass($status) {
         </div>
 
         <!-- Tenants Table -->
-        <div class="bg-white rounded-xl shadow-md overflow-hidden">
+        <div class="bg-white rounded-xl shadow-md overflow-x-auto">
             <?php if (empty($tenants)): ?>
             <div class="p-8 text-center">
                 <p class="text-gray-500 mb-2">No tenants found</p>
